@@ -1,0 +1,342 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+// Enums
+enum UserRole {
+  super_admin
+  lurah
+  sekretaris
+  petugas
+  warga
+}
+
+enum JenisKelamin {
+  laki_laki
+  perempuan
+}
+
+enum StatusPermohonan {
+  menunggu_verifikasi
+  dalam_proses
+  perlu_revisi
+  disetujui
+  ditolak
+  selesai
+}
+
+enum StatusPengaduan {
+  baru
+  diproses
+  eskalasi
+  selesai
+  ditutup
+}
+
+enum KategoriPengaduan {
+  infrastruktur
+  sosial
+  keamanan
+  administrasi
+  lainnya
+}
+
+enum JenisInformasi {
+  berita
+  pengumuman
+  kegiatan
+  anggaran
+}
+
+enum NotifChannel {
+  email
+  whatsapp
+  in_app
+}
+
+enum NotifStatus {
+  pending
+  terkirim
+  gagal
+}
+
+enum StatusPenduduk {
+  aktif
+  pindah_keluar
+  meninggal
+}
+
+enum JenisLokasi {
+  batas_rt
+  batas_rw
+  fasilitas_umum
+  kantor_kelurahan
+}
+
+// Models
+
+model User {
+  id                String    @id @default(cuid())
+  nik               String?   @unique
+  nama_lengkap      String
+  email             String    @unique
+  nomor_hp          String?
+  password_hash     String?
+  role              UserRole  @default(warga)
+  is_active         Boolean   @default(true)
+  email_verified_at DateTime?
+  last_login_at     DateTime?
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model WilayahRW {
+  id            String                   @id @default(cuid())
+  nomor_rw      String                   @unique
+  nama_ketua_rw String?
+  kontak_ketua  String?
+  // Poligon batas RW (PostGIS). Diisi lewat $executeRaw ST_GeomFromGeoJSON.
+  geom          Unsupported("geometry")?
+  created_at    DateTime                 @default(now())
+
+  rt_list     WilayahRT[]
+  lokasi_list Lokasi[]
+
+  @@map("wilayah_rw")
+}
+
+model WilayahRT {
+  id            String                   @id @default(cuid())
+  rw_id         String
+  nomor_rt      String
+  nama_ketua_rt String?
+  kontak_ketua  String?
+  // Poligon batas RT (PostGIS). Diisi lewat $executeRaw ST_GeomFromGeoJSON.
+  geom          Unsupported("geometry")?
+  created_at    DateTime                 @default(now())
+
+  rw          WilayahRW @relation(fields: [rw_id], references: [id], onDelete: Restrict)
+  lokasi_list Lokasi[]
+
+  @@unique([rw_id, nomor_rt])
+  @@map("wilayah_rt")
+}
+
+model KartuKeluarga {
+  id                 String   @id @default(cuid())
+  nomor_kk           String   @unique
+  kepala_keluarga_id String?
+  rt_id              String
+  alamat_lengkap     String
+  created_at         DateTime @default(now())
+  updated_at         DateTime @updatedAt
+
+  @@map("kartu_keluarga")
+}
+
+model Penduduk {
+  id                  String         @id @default(cuid())
+  user_id             String?
+  kk_id               String
+  nik                 String         @unique
+  nama_lengkap        String
+  tempat_lahir        String?
+  tanggal_lahir       DateTime?
+  jenis_kelamin       JenisKelamin?
+  agama               String?
+  pekerjaan           String?
+  pendidikan_terakhir String?
+  status_perkawinan   String?
+  status_dalam_kk     String?
+  status_penduduk     StatusPenduduk @default(aktif)
+  kewarganegaraan     String?
+  created_at          DateTime       @default(now())
+  updated_at          DateTime       @updatedAt
+
+  @@map("penduduk")
+}
+
+model JenisSurat {
+  id                   String   @id @default(cuid())
+  nama                 String
+  kode                 String   @unique
+  deskripsi            String?
+  template_html        String?
+  persyaratan_dokumen  String?
+  form_fields          String?
+  is_active            Boolean  @default(true)
+  estimasi_hari_proses Int?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+
+  @@map("jenis_surat")
+}
+
+model ServiceRequest {
+  id               String           @id @default(cuid())
+  nomor_permohonan String           @unique
+  pemohon_id       String
+  jenis_surat_id   String
+  petugas_id       String?
+  form_data        String?
+  status           StatusPermohonan @default(menunggu_verifikasi)
+  catatan_petugas  String?
+  pdf_url          String?
+  qr_token         String?          @unique
+  diajukan_at      DateTime         @default(now())
+  diproses_at      DateTime?
+  selesai_at       DateTime?
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+
+  @@map("service_requests")
+}
+
+model DokumenPermohonan {
+  id                 String   @id @default(cuid())
+  permohonan_id      String
+  nama_dokumen       String
+  file_url           String
+  file_type          String?
+  file_size_bytes    Int?
+  status_verifikasi  String?
+  catatan_verifikasi String?
+  uploaded_at        DateTime @default(now())
+
+  @@map("dokumen_permohonan")
+}
+
+model Antrian {
+  id                String   @id @default(cuid())
+  penduduk_id       String
+  tanggal_kunjungan DateTime
+  slot_waktu        String
+  nomor_antrian     String
+  qr_token          String?  @unique
+  keperluan         String?
+  status            String   @default("terjadwal")
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@map("antrian")
+}
+
+model Complaint {
+  id              String            @id @default(cuid())
+  nomor_tiket     String            @unique
+  pelapor_id      String
+  perespons_id    String?
+  kategori        KategoriPengaduan
+  judul           String
+  deskripsi       String
+  status          StatusPengaduan   @default(baru)
+  // Titik lokasi kejadian (FR-5.1). Query spasial lanjutan (ST_DWithin,
+  // ST_Contains) memakai ST_MakePoint(longitude, latitude) via $queryRaw.
+  latitude        Decimal?          @db.Decimal(10, 7)
+  longitude       Decimal?          @db.Decimal(10, 7)
+  respons_petugas String?
+  rating          Int?
+  komentar_rating String?
+  escalated_at    DateTime?
+  created_at      DateTime          @default(now())
+  updated_at      DateTime          @updatedAt
+
+  @@map("complaints")
+}
+
+model MediaPengaduan {
+  id           String   @id @default(cuid())
+  pengaduan_id String
+  file_url     String
+  file_type    String?
+  urutan       Int?
+  uploaded_at  DateTime @default(now())
+
+  @@map("media_pengaduan")
+}
+
+model InformasiPublik {
+  id               String         @id @default(cuid())
+  penulis_id       String
+  jenis            JenisInformasi
+  judul            String
+  konten           String
+  thumbnail_url    String?
+  is_published     Boolean        @default(false)
+  published_at     DateTime?
+  kegiatan_mulai   DateTime?
+  kegiatan_selesai DateTime?
+  lokasi_kegiatan  String?
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  @@map("informasi_publik")
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  user_id      String?
+  aksi         String
+  entitas      String
+  entitas_id   String?
+  data_sebelum String?
+  data_sesudah String?
+  ip_address   String?
+  user_agent   String?
+  created_at   DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+model Notifikasi {
+  id          String       @id @default(cuid())
+  penerima_id String
+  judul       String
+  pesan       String
+  channel     NotifChannel
+  status      NotifStatus  @default(pending)
+  retry_count Int          @default(0)
+  metadata    String?
+  created_at  DateTime     @default(now())
+  sent_at     DateTime?
+
+  @@map("notifikasi")
+}
+
+// Pilar #3: Peta & Informasi Wilayah (FR-4).
+// - fasilitas_umum / kantor_kelurahan: titik, diisi latitude+longitude
+// - batas_rt / batas_rw: poligon, diisi kolom `geom` via $executeRaw
+//   ST_GeomFromGeoJSON (Prisma tidak bisa menulis Unsupported langsung)
+model Lokasi {
+  id         String                   @id @default(cuid())
+  nama       String
+  jenis      JenisLokasi
+  rt_id      String?
+  alamat     String?
+  deskripsi  String?
+  // Titik koordinat (untuk jenis titik). SRID 4326.
+  latitude   Decimal?                 @db.Decimal(10, 7)
+  longitude  Decimal?                 @db.Decimal(10, 7)
+  // Geometri poligon (untuk batas_rt / batas_rw). SRID 4326.
+  geom       Unsupported("geometry")?
+  created_at DateTime                 @default(now())
+
+  rt          WilayahRT? @relation(fields: [rt_id], references: [id], onDelete: SetNull)
+  wilayahRW   WilayahRW? @relation(fields: [wilayahRWId], references: [id])
+  wilayahRWId String?
+
+  @@index([jenis])
+  @@map("lokasi")
+}

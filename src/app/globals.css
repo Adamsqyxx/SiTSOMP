@@ -1,26 +1,248 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   TOKEN DESAIN SiTSOMP (dari DESIGN.md — diekspor resmi via
+   @google/design.md export --format css-tailwind)
+   Nama kelas: bg-surface, text-on-surface-variant, font-headline-md,
+   text-headline-md, p-margin-mobile, border-border-subtle, dll.
+   ============================================================ */
 @theme inline {
+  /* Warna */
+  --color-surface: #f9f9ff;
+  --color-surface-dim: #d9d9e2;
+  --color-surface-bright: #f9f9ff;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f3fc;
+  --color-surface-container: #ededf6;
+  --color-surface-container-high: #e7e8f0;
+  --color-surface-container-highest: #e1e2ea;
+  --color-on-surface: #191c21;
+  --color-on-surface-variant: #424752;
+  --color-inverse-surface: #2e3037;
+  --color-inverse-on-surface: #f0f0f9;
+  --color-outline: #727784;
+  --color-outline-variant: #c2c6d4;
+  --color-surface-tint: #115cb9;
+  --color-primary: #003f87;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #0056b3;
+  --color-on-primary-container: #bbd0ff;
+  --color-inverse-primary: #acc7ff;
+  --color-secondary: #355e9f;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #90b6fe;
+  --color-on-secondary-container: #174687;
+  --color-tertiary: #722b00;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #983c00;
+  --color-on-tertiary-container: #ffc2a7;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #d7e2ff;
+  --color-primary-fixed-dim: #acc7ff;
+  --color-on-primary-fixed: #001a40;
+  --color-on-primary-fixed-variant: #004491;
+  --color-secondary-fixed: #d7e3ff;
+  --color-secondary-fixed-dim: #abc7ff;
+  --color-on-secondary-fixed: #001b3f;
+  --color-on-secondary-fixed-variant: #164686;
+  --color-tertiary-fixed: #ffdbcc;
+  --color-tertiary-fixed-dim: #ffb694;
+  --color-on-tertiary-fixed: #351000;
+  --color-on-tertiary-fixed-variant: #7b2f00;
+  --color-background: #f9f9ff;
+  --color-on-background: #191c21;
+  --color-surface-variant: #e1e2ea;
+  --color-success: #166534;
+  --color-warning: #9a3412;
+  --color-danger: #991b1b;
+  --color-info: #075985;
+  --color-surface-muted: #f8fafc;
+  --color-border-subtle: #e2e8f0;
+
+  /* Tipografi */
+  --font-headline-lg: "Inter", var(--font-sans);
+  --font-headline-lg-mobile: "Inter", var(--font-sans);
+  --font-headline-md: "Inter", var(--font-sans);
+  --font-headline-sm: "Inter", var(--font-sans);
+  --font-body-lg: "Inter", var(--font-sans);
+  --font-body-md: "Inter", var(--font-sans);
+  --font-body-sm: "Inter", var(--font-sans);
+  --font-label-md: "Inter", var(--font-sans);
+  --font-label-sm: "Inter", var(--font-sans);
+  --font-code-md: "monospace";
+
+  --text-headline-lg: 32px;
+  --text-headline-lg-mobile: 24px;
+  --text-headline-md: 24px;
+  --text-headline-sm: 20px;
+  --text-body-lg: 18px;
+  --text-body-md: 16px;
+  --text-body-sm: 14px;
+  --text-label-md: 14px;
+  --text-label-sm: 12px;
+  --text-code-md: 14px;
+
+  --leading-headline-lg: 40px;
+  --leading-headline-lg-mobile: 32px;
+  --leading-headline-md: 32px;
+  --leading-headline-sm: 28px;
+  --leading-body-lg: 28px;
+  --leading-body-md: 24px;
+  --leading-body-sm: 20px;
+  --leading-label-md: 16px;
+  --leading-label-sm: 16px;
+  --leading-code-md: 20px;
+
+  --tracking-headline-lg: -0.02em;
+  --tracking-label-md: 0.01em;
+  --tracking-label-sm: 0.02em;
+
+  --font-weight-headline-lg: 700;
+  --font-weight-headline-lg-mobile: 700;
+  --font-weight-headline-md: 600;
+  --font-weight-headline-sm: 600;
+  --font-weight-body-lg: 400;
+  --font-weight-body-md: 400;
+  --font-weight-body-sm: 400;
+  --font-weight-label-md: 600;
+  --font-weight-label-sm: 500;
+  --font-weight-code-md: 400;
+
+  /* Radius & spacing (token DESIGN.md) */
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+
+  --spacing-gutter: 16px;
+  --spacing-margin-mobile: 16px;
+  --spacing-margin-desktop: 32px;
+  --spacing-max-width: 1280px;
+
+  /* Mapping shadcn/ui ke CSS variables (light & dark) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius: 0.625rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Variabel CSS untuk komponen shadcn/ui (light) */
+:root {
+  --background: #f9f9ff;
+  --foreground: #191c21;
+  --card: #ffffff;
+  --card-foreground: #191c21;
+  --popover: #ffffff;
+  --popover-foreground: #191c21;
+  --primary: #003f87;
+  --primary-foreground: #ffffff;
+  --secondary: #355e9f;
+  --secondary-foreground: #ffffff;
+  --muted: #ededf6;
+  --muted-foreground: #424752;
+  --accent: #e1e2ea;
+  --accent-foreground: #191c21;
+  --destructive: #ba1a1a;
+  --border: #c2c6d4;
+  --input: #c2c6d4;
+  --ring: #0056b3;
+  --chart-1: #003f87;
+  --chart-2: #355e9f;
+  --chart-3: #722b00;
+  --chart-4: #166534;
+  --chart-5: #075985;
+  --radius: 0.25rem;
+  --sidebar: #f9f9ff;
+  --sidebar-foreground: #191c21;
+  --sidebar-primary: #003f87;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e1e2ea;
+  --sidebar-accent-foreground: #191c21;
+  --sidebar-border: #c2c6d4;
+  --sidebar-ring: #0056b3;
+}
+
+.dark {
+  --background: #191c21;
+  --foreground: #f0f0f9;
+  --card: #2e3037;
+  --card-foreground: #f0f0f9;
+  --popover: #2e3037;
+  --popover-foreground: #f0f0f9;
+  --primary: #acc7ff;
+  --primary-foreground: #001a40;
+  --secondary: #abc7ff;
+  --secondary-foreground: #001b3f;
+  --muted: #2e3037;
+  --muted-foreground: #e1e2ea;
+  --accent: #424752;
+  --accent-foreground: #f0f0f9;
+  --destructive: #ffdad6;
+  --border: #424752;
+  --input: #424752;
+  --ring: #90b6fe;
+  --chart-1: #acc7ff;
+  --chart-2: #90b6fe;
+  --chart-3: #ffb694;
+  --chart-4: #4ade80;
+  --chart-5: #38bdf8;
+  --sidebar: #191c21;
+  --sidebar-foreground: #f0f0f9;
+  --sidebar-primary: #acc7ff;
+  --sidebar-primary-foreground: #001a40;
+  --sidebar-accent: #424752;
+  --sidebar-accent-foreground: #f0f0f9;
+  --sidebar-border: #424752;
+  --sidebar-ring: #90b6fe;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
 }
