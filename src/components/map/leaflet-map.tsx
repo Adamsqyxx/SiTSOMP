@@ -3,15 +3,43 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { createClient } from "@/lib/supabase-client";
 import { Crosshair, Layers, Minus, Plus } from "lucide-react";
 
 // Pusat wilayah Kel. Tiro Sompe, Kec. Bacukiki Barat, Kota Parepare, Sulawesi Selatan.
 const CENTER: [number, number] = [-4.0250427, 119.6291098];
 const DEFAULT_ZOOM = 14;
 
-export default function LeafletMap() {
+export interface MapFeature {
+  id: string;
+  category: string;
+  name: string;
+  address: string;
+  detail: string;
+  latitude: number;
+  longitude: number;
+}
+
+interface LeafletMapProps {
+  onSelect?: (feature: MapFeature | null) => void;
+}
+
+// Marker tunggal dengan styling Material 3 (pin primary).
+function makeIcon(): L.DivIcon {
+  return L.divIcon({
+    className: "",
+    html: `<div class="flex items-center justify-center w-8 h-8 bg-primary text-on-primary rounded-full border-2 border-surface-container-lowest shadow-lg" style="transform:translate(-50%,-100%)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+    </div>`,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+  });
+}
+
+export default function LeafletMap({ onSelect }: LeafletMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.Marker[]>([]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -34,8 +62,59 @@ export default function LeafletMap() {
     return () => {
       map.remove();
       mapInstance.current = null;
+      markersRef.current = [];
     };
   }, []);
+
+  // Muat + render marker dari data, dan pasang subscription Realtime Supabase.
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map) return;
+
+    let active = true;
+
+    function renderFeatures(list: MapFeature[]) {
+      if (!active || !mapInstance.current) return;
+      markersRef.current.forEach((m) => m.remove());
+      markersRef.current = list.map((f) => {
+        const marker = L.marker([f.latitude, f.longitude], { icon: makeIcon() })
+          .addTo(mapInstance.current!)
+          .on("click", () => onSelect?.(f));
+        return marker;
+      });
+    }
+
+    async function load() {
+      try {
+        const res = await fetch("/api/fasilitas");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        renderFeatures(json.data ?? []);
+      } catch (err) {
+        console.error("Gagal memuat fasilitas:", err);
+      }
+    }
+
+    // Muat data awal.
+    load();
+
+    // Realtime: dengarkan perubahan pada tabel `lokasi` (INSERT/UPDATE/DELETE)
+    // lalu muat ulang marker. Jatuh diam-diam bila Realtime belum diaktifkan.
+    const supabase = createClient();
+    const channel = supabase
+      .channel("lokasi-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "lokasi" },
+        () => load()
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, [onSelect]);
 
   const zoomIn = () => mapInstance.current?.zoomIn();
   const zoomOut = () => mapInstance.current?.zoomOut();

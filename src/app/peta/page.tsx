@@ -59,18 +59,14 @@ const LEGEND_ROADS = [
 ] as const;
 
 interface Feature {
+  id: string;
   category: string;
   name: string;
   address: string;
   detail: string;
+  latitude: number;
+  longitude: number;
 }
-
-const INITIAL_FEATURE: Feature = {
-  category: "Pendidikan",
-  name: "SDN 1 Tiro Sompe",
-  address: "Jl. Pendidikan No. 45, RT 02/RW 03, Kel. Tiro Sompe",
-  detail: "Kondisi Bangunan: Baik\nJumlah Siswa: 340",
-};
 
 function SidebarContent() {
   return (
@@ -206,7 +202,7 @@ function GitPanelContent({
       </div>
 
       {/* Selected feature card (only on desktop panel) */}
-      {feature && (
+      {feature ? (
         <div className="p-4 border-t border-outline-variant bg-surface/90 backdrop-blur-md">
           <div className="flex justify-between items-start">
             <span className="inline-block px-2 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded mb-1">
@@ -239,6 +235,15 @@ function GitPanelContent({
             <Navigation aria-hidden="true" className="w-4 h-4" /> Rute
           </button>
         </div>
+      ) : (
+        <div className="p-4 border-t border-outline-variant bg-surface/90 backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center text-center py-6 text-on-surface-variant gap-2">
+            <MapPin aria-hidden="true" className="w-6 h-6 text-outline" />
+            <p className="font-body-sm text-body-sm">
+              Klik fasilitas atau wilayah di peta untuk melihat detailnya.
+            </p>
+          </div>
+        </div>
       )}
     </>
   );
@@ -246,7 +251,7 @@ function GitPanelContent({
 
 export default function PetaPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selected, setSelected] = useState<Feature | null>(INITIAL_FEATURE);
+  const [selected, setSelected] = useState<Feature | null>(null);
 
   return (
     <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen">
@@ -306,7 +311,7 @@ export default function PetaPage() {
           {/* Map display area */}
           <section className="flex-1 relative bg-surface-dim overflow-hidden">
             {/* Interaktif Leaflet map */}
-            <LeafletMap />
+            <LeafletMap onSelect={setSelected} />
 
             {/* Selected feature card (mobile overlay) */}
             {selected && (
