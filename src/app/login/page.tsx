@@ -2,18 +2,41 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Info, Lock, LogIn, ShieldCheck, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // TODO: Integrasi Supabase Auth saat kredensial tersedia.
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Placeholder — belum ada koneksi ke Supabase Auth.
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: identifier, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Gagal masuk. Coba lagi.");
+        return;
+      }
+      const next = new URLSearchParams(window.location.search).get("next") ?? "/dashboard";
+      router.push(next);
+      router.refresh();
+    } catch {
+      setError("Terjadi kesalahan jaringan. Coba lagi.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -120,13 +143,23 @@ export default function LoginPage() {
           {/* Submit action */}
           <Button
             type="submit"
-            className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-full shadow-sm h-auto"
+            disabled={loading}
+            className="w-full flex justify-center items-center gap-2 py-3 px-4 rounded-full shadow-sm h-auto disabled:opacity-60"
           >
             <span className="font-label-md text-label-md text-on-primary">
-              Masuk ke Sistem
+              {loading ? "Memproses..." : "Masuk ke Sistem"}
             </span>
             <LogIn aria-hidden="true" className="w-[18px] h-[18px]" />
           </Button>
+
+          {error && (
+            <div
+              role="alert"
+              className="bg-error-container text-on-error-container px-4 py-3 rounded-lg border border-error-container font-body-sm text-body-sm"
+            >
+              {error}
+            </div>
+          )}
         </form>
 
         {/* Alternative action */}
