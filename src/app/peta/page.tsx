@@ -1,15 +1,16 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Bell,
   FileText,
   LayoutDashboard,
+  LogOut,
+  Map,
   MapPin,
   Menu,
-  Route,
   Search,
   Settings,
   Users,
@@ -30,7 +31,7 @@ const SIDEBAR_ITEMS = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: false },
   { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
   { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: false },
-  { label: "Peta Wilayah", icon: Route, href: "/peta", active: true },
+  { label: "Peta Wilayah", icon: Map, href: "/peta", active: true },
   { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
 ] as const;
 
@@ -55,7 +56,7 @@ interface Feature {
   longitude: number;
 }
 
-function SidebarContent() {
+function SidebarContent({ onLogout }: { onLogout?: () => void }) {
   return (
     <>
       <div className="px-6 py-6 border-b border-outline-variant flex items-center gap-4">
@@ -85,7 +86,16 @@ function SidebarContent() {
         ))}
       </div>
       <div className="mt-auto p-4 text-center border-t border-outline-variant">
-        <span className="font-label-sm text-label-sm text-outline">v1.0.2</span>
+        <button
+          type="button"
+          aria-label="Keluar"
+          onClick={onLogout}
+          className="w-full flex items-center justify-center gap-2 py-2 rounded-full text-on-surface-variant hover:bg-error-container/60 hover:text-on-error-container transition-colors font-label-md text-label-md"
+        >
+          <LogOut aria-hidden="true" className="w-4 h-4" />
+          Keluar
+        </button>
+        <span className="font-label-sm text-label-sm text-outline block mt-1">v1.0.2</span>
       </div>
     </>
   );
@@ -296,19 +306,32 @@ export default function PetaPage() {
   const [query, setQuery] = useState("");
   const [categoryKey, setCategoryKey] = useState<string>("all");
 
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  };
+
   // Set pilihan dari query string kalau ada (?kategori=kesehatan).
   // useRouter di client; pakai window.location langsung agar sederhana.
   // Muat data fasilitas dari API untuk pencarian & filter client-side.
   const [loaded, setLoaded] = useState(false);
-  useMemo(() => {
+  useEffect(() => {
     if (loaded) return;
+    let cancelled = false;
     fetch("/api/fasilitas")
       .then((r) => r.json())
       .then((d) => {
+        if (cancelled) return;
         setAllFeatures(d.data ?? []);
         setLoaded(true);
       })
-      .catch(() => setLoaded(true));
+      .catch(() => {
+        if (!cancelled) setLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [loaded]);
 
   const filtered = useMemo(() => {
@@ -365,7 +388,7 @@ export default function PetaPage() {
             >
               <X aria-hidden="true" className="w-5 h-5" />
             </button>
-            <SidebarContent />
+            <SidebarContent onLogout={handleLogout} />
           </nav>
         </div>
       )}
@@ -373,7 +396,7 @@ export default function PetaPage() {
       <div className="flex flex-1 pt-16 h-full w-full">
         {/* Desktop sidebar */}
         <nav className="hidden md:flex flex-col bg-surface fixed left-0 top-0 h-full w-[280px] border-r border-outline-variant shadow-md z-40 pt-16">
-          <SidebarContent />
+          <SidebarContent onLogout={handleLogout} />
         </nav>
 
         {/* Main GIS work area */}

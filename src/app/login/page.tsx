@@ -16,13 +16,19 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const id = identifier.trim();
+    const pw = password;
+    if (!id || !pw) {
+      setError("NIK/Email dan kata sandi wajib diisi.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: identifier, password }),
+        body: JSON.stringify({ email: id, password: pw }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -103,13 +109,12 @@ export default function LoginPage() {
                 Kata Sandi
               </label>
               {/* TODO: route lupa sandi saat tersedia */}
-              <a
-                href="#"
-                onClick={(e) => e.preventDefault()}
-                className="font-label-sm text-label-sm text-primary hover:underline focus:outline-none focus:ring-2 focus:ring-primary rounded"
+              <span
+                className="font-label-sm text-label-sm text-outline cursor-not-allowed"
+                title="Fitur belum tersedia"
               >
                 Lupa Sandi?
-              </a>
+              </span>
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -190,7 +195,7 @@ export default function LoginPage() {
       {/* Footer */}
       <footer className="absolute bottom-6 w-full text-center z-10 px-margin-mobile">
         <p className="font-label-sm text-label-sm text-on-surface-variant">
-          © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
+          © {new Date().getFullYear()} Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
         </p>
       </footer>
     </div>
