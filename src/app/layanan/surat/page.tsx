@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   Bell,
@@ -23,18 +25,18 @@ import {
 import { cn } from "@/lib/utils";
 
 const DESKTOP_NAV = [
-  { label: "Beranda", icon: Home, active: false },
-  { label: "Layanan", icon: FileText, active: true },
-  { label: "Peta", icon: Map, active: false },
-  { label: "Profil", icon: User, active: false },
+  { label: "Beranda", icon: Home, href: "/", active: false },
+  { label: "Layanan", icon: FileText, href: "/layanan/surat", active: true },
+  { label: "Peta", icon: Map, href: "/peta", active: false },
+  { label: "Profil", icon: User, href: "/login", active: false },
 ] as const;
 
 const SIDEBAR_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, active: false },
-  { label: "Data Penduduk", icon: Users, active: false },
-  { label: "Administrasi", icon: FileText, active: true },
-  { label: "Peta Wilayah", icon: Route, active: false },
-  { label: "Pengaturan", icon: Settings, active: false },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: false },
+  { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
+  { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: true },
+  { label: "Peta Wilayah", icon: Route, href: "/peta", active: false },
+  { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
 ] as const;
 
 const CATEGORIES = ["Semua", "Kependudukan", "Usaha", "Sosial"] as const;
@@ -113,10 +115,9 @@ function SidebarContent() {
       </div>
       <nav className="flex flex-col gap-1">
         {SIDEBAR_ITEMS.map((item) => (
-          <a
+          <Link
             key={item.label}
-            href="#"
-            onClick={(e) => e.preventDefault()}
+            href={item.href}
             className={cn(
               "flex items-center gap-3 px-4 py-3 mx-2 rounded-full font-body-md text-body-md transition-all duration-200",
               item.active
@@ -126,7 +127,7 @@ function SidebarContent() {
           >
             <item.icon aria-hidden="true" className="w-5 h-5" />
             {item.label}
-          </a>
+          </Link>
         ))}
       </nav>
     </>
@@ -134,6 +135,7 @@ function SidebarContent() {
 }
 
 export default function LayananSuratPage() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("Semua");
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -150,6 +152,12 @@ export default function LayananSuratPage() {
       return matchCat && matchQ;
     });
   }, [query, category]);
+
+  const handleAction = (s: Service) => {
+    // Alur pengajuan nyata tersedia nanti; sekarang arahkan ke halaman pengajuan
+    // dengan kode surat terpilih.
+    router.push(`/layanan/surat/${s.id.toLowerCase()}?jenis=${encodeURIComponent(s.name)}`);
+  };
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
@@ -170,10 +178,9 @@ export default function LayananSuratPage() {
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-2">
           {DESKTOP_NAV.map((item) => (
-            <a
+            <Link
               key={item.label}
-              href="#"
-              onClick={(e) => e.preventDefault()}
+              href={item.href}
               className={cn(
                 "flex items-center gap-2 px-4 py-2 rounded-full font-label-md text-label-md transition-colors duration-200",
                 item.active
@@ -183,7 +190,7 @@ export default function LayananSuratPage() {
             >
               <item.icon aria-hidden="true" className="w-5 h-5" />
               {item.label}
-            </a>
+            </Link>
           ))}
         </nav>
 
@@ -191,7 +198,9 @@ export default function LayananSuratPage() {
           <button
             type="button"
             aria-label="Notifikasi"
+            onClick={() => router.push("/pengumuman")}
             className="hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center text-on-surface-variant"
+            title="Lihat pengumuman"
           >
             <Bell aria-hidden="true" className="w-5 h-5" />
           </button>
@@ -272,7 +281,7 @@ export default function LayananSuratPage() {
           {filtered.length === 0 ? (
             <div className="text-center py-16 text-on-surface-variant font-body-md">
               Tidak ada layanan yang cocok dengan pencarian &quot;{query}&quot;.
-              </div>
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filtered.map((s) => (
@@ -304,6 +313,7 @@ export default function LayananSuratPage() {
                   </div>
                   <button
                     type="button"
+                    onClick={() => handleAction(s)}
                     className={cn(
                       "w-full py-3 rounded-lg font-label-md text-label-md transition-colors flex justify-center items-center gap-2 mt-auto",
                       s.actionClass
@@ -325,18 +335,23 @@ export default function LayananSuratPage() {
           © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
         </div>
         <div className="flex flex-wrap gap-4 md:justify-end text-on-surface-variant">
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">
+          <Link className="hover:text-primary underline transition-opacity duration-150" href="/kontak">
             Kontak Kami
-          </a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">
+          </Link>
+          <Link className="hover:text-primary underline transition-opacity duration-150" href="/kebijakan-privasi">
             Kebijakan Privasi
-          </a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">
+          </Link>
+          <Link
+            className="hover:text-primary underline transition-opacity duration-150"
+            href="https://kemendagri.go.id"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Portal Nasional
-          </a>
-          <a className="hover:text-primary underline transition-opacity duration-150" href="#">
+          </Link>
+          <Link className="hover:text-primary underline transition-opacity duration-150" href="/peta-situs">
             Peta Situs
-          </a>
+          </Link>
         </div>
       </footer>
     </div>

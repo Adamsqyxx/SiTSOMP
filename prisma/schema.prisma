@@ -134,7 +134,7 @@ model WilayahRT {
   @@map("wilayah_rt")
 }
 
-model KartuKeluarga {
+model kartuKeluargaRelation {
   id                 String   @id @default(cuid())
   nomor_kk           String   @unique
   kepala_keluarga_id String?
@@ -142,6 +142,8 @@ model KartuKeluarga {
   alamat_lengkap     String
   created_at         DateTime @default(now())
   updated_at         DateTime @updatedAt
+
+  penduduk_list Penduduk[]
 
   @@map("kartu_keluarga")
 }
@@ -164,6 +166,8 @@ model Penduduk {
   kewarganegaraan     String?
   created_at          DateTime       @default(now())
   updated_at          DateTime       @updatedAt
+
+  kk kartuKeluargaRelation @relation(fields: [kk_id], references: [id], onDelete: Restrict)
 
   @@map("penduduk")
 }

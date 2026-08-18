@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  ArrowRight,
   Bell,
   FileText,
   Map,
@@ -38,7 +37,9 @@ export default function BerandaPage() {
             >
               <Menu aria-hidden="true" className="w-5 h-5" />
             </button>
-            <h1 className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</h1>
+            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
+              SiTSOMP
+            </Link>
           </div>
 
           <nav className="hidden md:flex gap-6 items-center">
@@ -58,46 +59,45 @@ export default function BerandaPage() {
             ))}
           </nav>
 
-          <button
-            type="button"
+          <Link
+            href="/login"
             aria-label="Notifikasi"
             className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+            title="Masuk untuk melihat notifikasi"
           >
             <Bell aria-hidden="true" className="w-5 h-5" />
-          </button>
+          </Link>
         </div>
 
         {/* Mobile drawer */}
         {drawerOpen && (
-          <div className="lg hidden">
-            <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-              <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-              <nav className="absolute left-0 top-0 h-full w-[280px] bg-surface flex flex-col p-4 shadow-xl">
-                <button
-                  type="button"
-                  aria-label="Tutup menu"
+          <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
+            <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+            <nav className="absolute left-0 top-0 h-full w-[280px] bg-surface flex flex-col p-4 shadow-xl">
+              <button
+                type="button"
+                aria-label="Tutup menu"
+                onClick={() => setDrawerOpen(false)}
+                className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low z-10"
+              >
+                <X aria-hidden="true" className="w-5 h-5" />
+              </button>
+              {DESKTOP_NAV.map((item) => (
+                <Link
+                  key={item.label}
+                  href={item.href}
                   onClick={() => setDrawerOpen(false)}
-                  className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low z-10"
+                  className={cn(
+                    "px-4 py-3 rounded-full font-label-md text-label-md transition-colors",
+                    item.active
+                      ? "bg-primary-container text-on-primary-container"
+                      : "text-on-surface-variant hover:bg-surface-container-high"
+                  )}
                 >
-                  <X aria-hidden="true" className="w-5 h-5" />
-                </button>
-                {DESKTOP_NAV.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setDrawerOpen(false)}
-                    className={cn(
-                      "px-4 py-3 rounded-full font-label-md text-label-md transition-colors",
-                      item.active
-                        ? "bg-primary-container text-on-primary-container"
-                        : "text-on-surface-variant hover:bg-surface-container-high"
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-              </nav>
-            </div>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           </div>
         )}
       </header>
@@ -170,7 +170,7 @@ export default function BerandaPage() {
 
             {/* Data Penduduk */}
             <Link
-              href="#"
+              href="/data-penduduk"
               className="bg-surface rounded-xl p-6 border border-border-subtle hover:border-primary hover:shadow-md transition-all group min-h-[160px] flex flex-col justify-between"
             >
               <div>
@@ -206,7 +206,7 @@ export default function BerandaPage() {
 
             {/* Pengumuman */}
             <Link
-              href="#"
+              href="/pengumuman"
               className="bg-surface rounded-xl p-6 border border-border-subtle hover:border-primary hover:shadow-md transition-all group col-span-1 md:col-span-3 lg:col-span-4 bg-surface-muted flex items-center justify-between"
             >
               <div className="flex items-center gap-4">
@@ -222,7 +222,6 @@ export default function BerandaPage() {
                   </p>
                 </div>
               </div>
-              <ArrowRight aria-hidden="true" className="w-5 h-5 text-outline hidden md:block group-hover:text-primary transition-colors" />
             </Link>
           </div>
         </section>
@@ -237,18 +236,18 @@ export default function BerandaPage() {
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">
-            <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
+            <Link className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="/kontak">
               Kontak Kami
-            </a>
-            <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
+            </Link>
+            <Link className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="/kebijakan-privasi">
               Kebijakan Privasi
-            </a>
-            <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
+            </Link>
+            <Link className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="https://kemendagri.go.id" target="_blank" rel="noopener noreferrer">
               Portal Nasional
-            </a>
-            <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
+            </Link>
+            <Link className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="/peta-situs">
               Peta Situs
-            </a>
+            </Link>
           </div>
         </div>
       </footer>

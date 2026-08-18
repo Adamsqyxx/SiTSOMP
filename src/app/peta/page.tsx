@@ -1,19 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Bell,
-  Church,
   FileText,
-  GraduationCap,
-  Hospital,
-  Info,
-  Landmark,
   LayoutDashboard,
   MapPin,
   Menu,
-  Navigation,
   Route,
   Search,
   Settings,
@@ -22,29 +17,21 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// Leaflet akses `window` saat import → hanya dimuat di sisi client (ssr: false).
-const LeafletMap = dynamic(() => import("@/components/map/leaflet-map"), {
-  ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 z-0 flex items-center justify-center bg-surface-dim text-on-surface-variant font-body-sm">
-      Memuat peta...
-    </div>
-  ),
-});
-
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, active: false },
-  { label: "Data Penduduk", icon: Users, active: false },
-  { label: "Administrasi", icon: FileText, active: false },
-  { label: "Peta Wilayah", icon: Route, active: true },
-  { label: "Pengaturan", icon: Settings, active: false },
+// Daftar kategori fasilitas (dipetakan ke nilai enum JenisLokasi).
+const CATEGORIES = [
+  { label: "Semua", key: "all", color: "text-primary" },
+  { label: "Kesehatan", key: "kesehatan", color: "text-primary" },
+  { label: "Pendidikan", key: "pendidikan", color: "text-on-primary-container" },
+  { label: "Pemerintahan", key: "pemerintahan", color: "text-tertiary" },
+  { label: "Ibadah", key: "ibadah", color: "text-secondary" },
 ] as const;
 
-const CATEGORIES = [
-  { label: "Kesehatan", icon: Hospital, color: "text-primary", active: false },
-  { label: "Pendidikan", icon: GraduationCap, color: "text-on-primary-container", active: true },
-  { label: "Pemerintahan", icon: Landmark, color: "text-tertiary", active: false },
-  { label: "Ibadah", icon: Church, color: "text-secondary", active: false },
+const SIDEBAR_ITEMS = [
+  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: false },
+  { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
+  { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: false },
+  { label: "Peta Wilayah", icon: Route, href: "/peta", active: true },
+  { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
 ] as const;
 
 const LEGEND_ADMIN = [
@@ -82,10 +69,9 @@ function SidebarContent() {
       </div>
       <div className="flex flex-col py-4 gap-2 overflow-y-auto">
         {SIDEBAR_ITEMS.map((item) => (
-          <a
+          <Link
             key={item.label}
-            href="#"
-            onClick={(e) => e.preventDefault()}
+            href={item.href}
             className={cn(
               "flex items-center gap-3 px-4 py-3 mx-2 rounded-full transition-all duration-200",
               item.active
@@ -95,7 +81,7 @@ function SidebarContent() {
           >
             <item.icon aria-hidden="true" className="w-5 h-5" />
             <span className="font-label-md text-label-md">{item.label}</span>
-          </a>
+          </Link>
         ))}
       </div>
       <div className="mt-auto p-4 text-center border-t border-outline-variant">
@@ -106,14 +92,22 @@ function SidebarContent() {
 }
 
 function GitPanelContent({
+  features,
+  query,
+  setQuery,
+  categoryKey,
+  setCategoryKey,
   feature,
   onClose,
 }: {
+  features: Feature[];
+  query: string;
+  setQuery: (v: string) => void;
+  categoryKey: string;
+  setCategoryKey: (v: string) => void;
   feature: Feature | null;
   onClose?: () => void;
 }) {
-  const [query, setQuery] = useState("");
-
   return (
     <>
       {/* Search */}
@@ -132,6 +126,30 @@ function GitPanelContent({
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
+        {/* Hasil pencarian */}
+        {query.trim() && (
+          <ul className="mt-3 space-y-1 max-h-48 overflow-y-auto">
+            {features.length === 0 && (
+              <li className="font-body-sm text-body-sm text-on-surface-variant px-2 py-1">
+                Tidak ada hasil.
+              </li>
+            )}
+            {features.map((f) => (
+              <li key={f.id}>
+                <button
+                  type="button"
+                  onClick={() => onClose?.()}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2"
+                >
+                  <MapPin aria-hidden="true" className="w-4 h-4 text-primary shrink-0" />
+                  <span className="font-body-sm text-body-sm text-on-surface truncate">
+                    {f.name}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Filters */}
@@ -140,25 +158,25 @@ function GitPanelContent({
         <div className="grid grid-cols-2 gap-3">
           {CATEGORIES.map((cat) => (
             <button
-              key={cat.label}
+              key={cat.key}
               type="button"
+              onClick={() => setCategoryKey(cat.key)}
               className={cn(
                 "flex flex-col items-center justify-center p-3 rounded-xl transition-colors group",
-                cat.active
+                categoryKey === cat.key
                   ? "bg-primary-container text-on-primary-container border border-primary-container"
                   : "bg-surface-container-low border border-outline-variant hover:bg-surface-container-high"
               )}
             >
-              <cat.icon
-                aria-hidden="true"
-                className={cn("mb-1 group-hover:scale-110 transition-transform", cat.color)}
-              />
-              <span className={cn("font-label-sm text-label-sm", !cat.active && "text-on-surface")}>
+              <span className={cn("font-label-sm text-label-sm", categoryKey === cat.key ? "text-on-primary-container" : "text-on-surface")}>
                 {cat.label}
               </span>
             </button>
           ))}
         </div>
+        <p className="font-label-sm text-label-sm text-outline mt-3">
+          {features.length} fasilitas ditampilkan
+        </p>
       </div>
 
       {/* Legend */}
@@ -224,15 +242,19 @@ function GitPanelContent({
               <span className="font-body-sm text-body-sm">{feature.address}</span>
             </div>
             <div className="flex gap-2 items-start">
-              <Info aria-hidden="true" className="w-4 h-4 mt-0.5 shrink-0" />
+              <MapPin aria-hidden="true" className="w-4 h-4 mt-0.5 shrink-0" />
               <span className="font-body-sm text-body-sm whitespace-pre-line">{feature.detail}</span>
             </div>
           </div>
           <button
             type="button"
+            onClick={() => {
+              const url = `https://www.google.com/maps/dir/?api=1&destination=${feature.latitude},${feature.longitude}`;
+              window.open(url, "_blank", "noopener,noreferrer");
+            }}
             className="w-full mt-3 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-on-primary-fixed-variant transition-colors flex items-center justify-center gap-2"
           >
-            <Navigation aria-hidden="true" className="w-4 h-4" /> Rute
+            <NavigationIcon /> Rute
           </button>
         </div>
       ) : (
@@ -249,9 +271,60 @@ function GitPanelContent({
   );
 }
 
+function NavigationIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="w-4 h-4"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polygon points="3 11 22 2 13 21 11 13 3 11" />
+    </svg>
+  );
+}
+
 export default function PetaPage() {
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<Feature | null>(null);
+  const [allFeatures, setAllFeatures] = useState<Feature[]>([]);
+  const [query, setQuery] = useState("");
+  const [categoryKey, setCategoryKey] = useState<string>("all");
+
+  // Set pilihan dari query string kalau ada (?kategori=kesehatan).
+  // useRouter di client; pakai window.location langsung agar sederhana.
+  // Muat data fasilitas dari API untuk pencarian & filter client-side.
+  const [loaded, setLoaded] = useState(false);
+  useMemo(() => {
+    if (loaded) return;
+    fetch("/api/fasilitas")
+      .then((r) => r.json())
+      .then((d) => {
+        setAllFeatures(d.data ?? []);
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, [loaded]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return allFeatures
+      .filter((f) => {
+        const matchQ =
+          !q ||
+          f.name.toLowerCase().includes(q) ||
+          f.address.toLowerCase().includes(q) ||
+          f.detail.toLowerCase().includes(q);
+        const matchCat = categoryKey === "all" || f.category === categoryKey;
+        return matchQ && matchCat;
+      })
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [allFeatures, query, categoryKey]);
 
   return (
     <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen">
@@ -271,7 +344,9 @@ export default function PetaPage() {
         <button
           type="button"
           aria-label="Notifikasi"
+          onClick={() => router.push("/pengumuman")}
           className="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center"
+          title="Lihat pengumuman"
         >
           <Bell aria-hidden="true" className="w-5 h-5" />
         </button>
@@ -305,7 +380,15 @@ export default function PetaPage() {
         <main className="flex-1 flex ml-0 md:ml-[280px] h-full relative">
           {/* Persistent side panel (desktop) */}
           <aside className="hidden md:flex w-80 bg-surface border-r border-outline-variant flex-col h-full shadow-[2px_0_8px_-4px_rgba(0,0,0,0.1)] z-10">
-            <GitPanelContent feature={selected} onClose={() => setSelected(null)} />
+            <GitPanelContent
+              features={filtered}
+              query={query}
+              setQuery={setQuery}
+              categoryKey={categoryKey}
+              setCategoryKey={setCategoryKey}
+              feature={selected}
+              onClose={() => setSelected(null)}
+            />
           </aside>
 
           {/* Map display area */}
@@ -340,16 +423,20 @@ export default function PetaPage() {
                     <span className="font-body-sm text-body-sm">{selected.address}</span>
                   </div>
                   <div className="flex gap-3 items-start text-on-surface-variant">
-                    <Info aria-hidden="true" className="w-[18px] h-[18px] mt-0.5 shrink-0" />
+                    <MapPin aria-hidden="true" className="w-[18px] h-[18px] mt-0.5 shrink-0" />
                     <span className="font-body-sm text-body-sm whitespace-pre-line">
                       {selected.detail}
                     </span>
                   </div>
                   <button
                     type="button"
+                    onClick={() => {
+                      const url = `https://www.google.com/maps/dir/?api=1&destination=${selected.latitude},${selected.longitude}`;
+                      window.open(url, "_blank", "noopener,noreferrer");
+                    }}
                     className="w-full mt-2 py-2 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-on-primary-fixed-variant transition-colors flex items-center justify-center gap-2"
                   >
-                    <Navigation aria-hidden="true" className="w-[18px] h-[18px]" /> Rute
+                    <NavigationIcon /> Rute
                   </button>
                 </div>
               </div>
@@ -366,3 +453,14 @@ export default function PetaPage() {
     </div>
   );
 }
+
+// Leaflet akses `window` saat import → hanya dimuat di sisi client (ssr: false).
+import dynamic from "next/dynamic";
+const LeafletMap = dynamic(() => import("@/components/map/leaflet-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="absolute inset-0 z-0 flex items-center justify-center bg-surface-dim text-on-surface-variant font-body-sm">
+      Memuat peta...
+    </div>
+  ),
+});

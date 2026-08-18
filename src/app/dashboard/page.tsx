@@ -1,27 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Bell,
-  Download,
-  Eye,
-  FileText,
-  LayoutDashboard,
-  Megaphone,
-  Menu,
-  Route,
-  Settings,
-  Users,
-  X,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Bell, Download, Eye, FileText, LayoutDashboard, Megaphone, Menu, Route, Settings, Users, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, active: true },
-  { label: "Data Penduduk", icon: Users, active: false },
-  { label: "Administrasi", icon: FileText, active: false },
-  { label: "Peta Wilayah", icon: Route, active: false },
-  { label: "Pengaturan", icon: Settings, active: false },
+  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: true },
+  { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
+  { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: false },
+  { label: "Peta Wilayah", icon: Route, href: "/peta", active: false },
+  { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
 ] as const;
 
 interface TimelineStep {
@@ -105,27 +94,43 @@ const ANNOUNCEMENTS = [
   },
 ] as const;
 
-function SidebarContent() {
+interface UserInfo {
+  email?: string | null;
+  nama_lengkap?: string | null;
+  role?: string | null;
+}
+
+function UserBadge({ user }: { user: UserInfo | null }) {
+  const initials = (user?.nama_lengkap?.trim() || user?.email || "?").trim().slice(0, 2).toUpperCase();
+  return (
+    <div className="flex items-center gap-4">
+      <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md font-bold shrink-0 overflow-hidden">
+        {initials || "AK"}
+      </div>
+      <div className="flex flex-col min-w-0">
+        <span className="font-label-md text-label-md font-bold text-on-surface truncate">
+          {user?.nama_lengkap || "Admin Kelurahan"}
+        </span>
+        <span className="font-label-sm text-label-sm text-on-surface-variant truncate">
+          {user?.email || "Tiro Sompe"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function SidebarContent({ user }: { user: UserInfo | null }) {
   return (
     <>
-      {/* Brand / Header */}
       <div className="p-6 border-b border-outline-variant flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md font-bold shrink-0">
-          AK
-        </div>
-        <div className="flex flex-col">
-          <span className="font-label-md text-label-md font-bold text-on-surface">Admin Kelurahan</span>
-          <span className="font-label-sm text-label-sm text-on-surface-variant">Tiro Sompe</span>
-        </div>
+        <UserBadge user={user} />
       </div>
 
-      {/* Navigation Links */}
       <div className="flex flex-col py-4 gap-2 flex-grow overflow-y-auto">
         {NAV_ITEMS.map((item) => (
           <a
             key={item.label}
-            href="#"
-            onClick={(e) => e.preventDefault()}
+            href={item.href}
             className={cn(
               "flex items-center gap-3 px-4 py-3 mx-2 rounded-full transition-all duration-200",
               item.active
@@ -139,7 +144,6 @@ function SidebarContent() {
         ))}
       </div>
 
-      {/* Meta / Version */}
       <div className="p-4 border-t border-outline-variant text-center">
         <span className="font-label-sm text-label-sm text-on-surface-variant">v1.0.2</span>
       </div>
@@ -148,13 +152,31 @@ function SidebarContent() {
 }
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [user, setUser] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((d) => setUser(d.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } finally {
+      router.push("/login");
+      router.refresh();
+    }
+  };
 
   return (
     <div className="bg-background text-on-background font-body-md text-body-md h-screen flex overflow-hidden">
       {/* Sidebar (desktop) */}
       <nav className="hidden md:flex flex-col bg-surface border-r border-outline-variant shadow-md fixed left-0 top-0 h-full w-[280px] z-40">
-        <SidebarContent />
+        <SidebarContent user={user} />
       </nav>
 
       {/* Mobile drawer */}
@@ -174,7 +196,7 @@ export default function DashboardPage() {
             >
               <X aria-hidden="true" className="w-5 h-5" />
             </button>
-            <SidebarContent />
+            <SidebarContent user={user} />
           </nav>
         </div>
       )}
@@ -197,7 +219,9 @@ export default function DashboardPage() {
           <button
             type="button"
             aria-label="Notifikasi"
+            onClick={() => router.push("/pengumuman")}
             className="text-on-surface-variant p-2 hover:bg-surface-container-low rounded-full transition-colors duration-200 relative"
+            title="Lihat pengumuman"
           >
             <Bell aria-hidden="true" className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full border border-surface" />
@@ -208,11 +232,22 @@ export default function DashboardPage() {
         <div className="flex-grow overflow-y-auto p-margin-mobile md:p-margin-desktop bg-background">
           <div className="max-w-max-width mx-auto flex flex-col gap-8">
             {/* Page header */}
-            <div>
-              <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard Warga</h1>
-              <p className="font-body-md text-body-md text-on-surface-variant mt-2">
-                Pantau status pengajuan administrasi dan notifikasi terkini Anda.
-              </p>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard Warga</h1>
+                <p className="font-body-md text-body-md text-on-surface-variant mt-2">
+                  Pantau status pengajuan administrasi dan notifikasi terkini Anda.
+                </p>
+              </div>
+              {user && (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="font-label-md text-label-md text-on-surface-variant hover:text-danger border border-outline-variant hover:border-danger px-4 py-2 rounded-full transition-colors"
+                >
+                  Keluar
+                </button>
+              )}
             </div>
 
             {/* Bento grid */}
@@ -281,9 +316,10 @@ export default function DashboardPage() {
                     <h2 className="font-headline-sm text-headline-sm text-on-surface">Riwayat Pengajuan</h2>
                     <button
                       type="button"
+                      onClick={() => router.push("/layanan/surat")}
                       className="font-label-md text-label-md text-primary hover:underline"
                     >
-                      Lihat Semua
+                      Ajukan Surat
                     </button>
                   </div>
                   <div className="overflow-x-auto">
@@ -330,6 +366,7 @@ export default function DashboardPage() {
                               {row.status === "Selesai" ? (
                                 <button
                                   type="button"
+                                  onClick={() => router.push("/layanan/surat")}
                                   className="text-primary hover:text-primary-fixed-variant transition-colors"
                                   title="Unduh Dokumen"
                                   aria-label="Unduh Dokumen"
@@ -339,6 +376,7 @@ export default function DashboardPage() {
                               ) : (
                                 <button
                                   type="button"
+                                  onClick={() => router.push("/layanan/surat")}
                                   className="text-outline hover:text-on-surface transition-colors"
                                   title="Lihat Detail"
                                   aria-label="Lihat Detail"
@@ -382,6 +420,7 @@ export default function DashboardPage() {
                   </div>
                   <button
                     type="button"
+                    onClick={() => router.push("/pengumuman")}
                     className="w-full mt-6 py-2 border border-outline-variant text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-low transition-colors"
                   >
                     Lihat Semua Pengumuman
@@ -395,19 +434,11 @@ export default function DashboardPage() {
               <div className="font-body-sm text-body-sm text-on-surface-variant">
                 © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
               </div>
-              <div className="flex gap-4 flex-wrap md:justify-end">
-                <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
-                  Kontak Kami
-                </a>
-                <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
-                  Kebijakan Privasi
-                </a>
-                <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
-                  Portal Nasional
-                </a>
-                <a className="font-body-sm text-body-sm text-on-surface-variant hover:text-primary underline transition-opacity duration-150" href="#">
-                  Peta Situs
-                </a>
+              <div className="flex gap-4 flex-wrap md:justify-end font-body-sm text-body-sm text-on-surface-variant">
+                <span className="hover:text-primary underline transition-opacity duration-150">Kontak Kami</span>
+                <span className="hover:text-primary underline transition-opacity duration-150">Kebijakan Privasi</span>
+                <span className="hover:text-primary underline transition-opacity duration-150">Portal Nasional</span>
+                <span className="hover:text-primary underline transition-opacity duration-150">Peta Situs</span>
               </div>
             </footer>
           </div>
