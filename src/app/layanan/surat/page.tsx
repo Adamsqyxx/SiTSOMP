@@ -23,12 +23,13 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AuthButtons from "@/components/auth-buttons";
 
 const DESKTOP_NAV = [
   { label: "Beranda", icon: Home, href: "/", active: false },
   { label: "Layanan", icon: FileText, href: "/layanan/surat", active: true },
   { label: "Peta", icon: Map, href: "/peta", active: false },
-  { label: "Profil", icon: User, href: "/login", active: false },
+  { label: "Profil", icon: User, href: "/profil", active: false },
 ] as const;
 
 const SIDEBAR_ITEMS = [
@@ -83,9 +84,10 @@ const SERVICES: Service[] = [
     desc: "Keterangan tempat tinggal sementara bagi warga yang belum memiliki KTP setempat.",
     requirements: ["Pengantar RT/RW", "Fotokopi KTP asal", "Fotokopi KK asal"],
     icon: MapPin,
-    iconClass: "bg-tertiary-fixed text-tertiary",
-    action: "Lihat Detail",
-    actionClass: "border border-primary text-primary hover:bg-surface-container-low",
+    // Konsisten dengan SKTM/SKU: ikon tonal + tombol solid primary.
+    iconClass: "bg-secondary-fixed text-secondary",
+    action: "Buat Pengajuan",
+    actionClass: "bg-primary text-on-primary hover:bg-on-primary-fixed-variant",
   },
   {
     id: "SKM",
@@ -130,6 +132,9 @@ function SidebarContent() {
           </Link>
         ))}
       </nav>
+      <div className="mt-auto p-4 border-t border-outline-variant">
+        <AuthButtons stacked />
+      </div>
     </>
   );
 }
@@ -172,7 +177,7 @@ export default function LayananSuratPage() {
           >
             <Menu aria-hidden="true" className="w-5 h-5" />
           </button>
-          <span className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</span>
+          <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</Link>
         </div>
 
         {/* Desktop nav */}
@@ -194,7 +199,7 @@ export default function LayananSuratPage() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
           <button
             type="button"
             aria-label="Notifikasi"
@@ -204,6 +209,7 @@ export default function LayananSuratPage() {
           >
             <Bell aria-hidden="true" className="w-5 h-5" />
           </button>
+          <AuthButtons className="hidden md:flex" />
         </div>
       </header>
 

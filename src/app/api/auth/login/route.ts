@@ -11,9 +11,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email dan kata sandi wajib diisi." }, { status: 400 });
     }
 
+    // Supabase Auth menyimpan akun dengan email sintetis "<NIK>@sitsomp.id"
+    // (register page tidak punya field email). User biasa mengetik NIK-nya saja
+    // di form login — normalisasi di sini supaya pencarian auth cocok.
+    let identifier = String(email).trim().toLowerCase();
+    if (/^\d{16}$/.test(identifier)) {
+      identifier = `${identifier}@sitsomp.id`;
+    }
+
     const supabase = await createClient();
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: identifier,
       password,
     });
 

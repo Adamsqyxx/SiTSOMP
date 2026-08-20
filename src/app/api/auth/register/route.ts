@@ -16,8 +16,25 @@ export async function POST(req: Request) {
     if (typeof password !== "string" || password.length < 8) {
       return NextResponse.json({ error: "Kata sandi minimal 8 karakter." }, { status: 400 });
     }
-    if (nik && !/^\d{16}$/.test(nik)) {
-      return NextResponse.json({ error: "NIK harus 16 digit angka." }, { status: 400 });
+    if (!nik || !/^\d{16}$/.test(nik)) {
+      return NextResponse.json({ error: "NIK wajib diisi dan harus 16 digit angka." }, { status: 400 });
+    }
+    if (nomor_hp && !/^[0-9+\-\s()]{8,16}$/.test(String(nomor_hp))) {
+      return NextResponse.json({ error: "Nomor telepon tidak valid." }, { status: 400 });
+    }
+
+    // Cek duplikat NIK lebih dulu agar tidak meninggalkan user Supabase yatim
+    // (sudah dibuat di step 1 tapi gagal insert Prisma karena duplikat).
+    const existing = await prisma.user.findFirst({
+      where: { OR: [{ nik }, { email }] },
+      select: { nik: true, email: true },
+    });
+    if (existing) {
+      const isNikDup = existing.nik === nik;
+      return NextResponse.json(
+        { error: isNikDup ? "NIK ini sudah terdaftar." : "Email ini sudah terdaftar." },
+        { status: 409 }
+      );
     }
 
     // 1) Daftarkan user di Supabase Auth (service role agar auto-confirm).

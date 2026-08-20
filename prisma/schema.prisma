@@ -77,10 +77,17 @@ enum StatusPenduduk {
 }
 
 enum JenisLokasi {
+  batas_kelurahan
   batas_rt
   batas_rw
   fasilitas_umum
   kantor_kelurahan
+  fasilitas_kesehatan
+  fasilitas_pendidikan
+  fasilitas_ibadah
+  fasilitas_pemerintahan
+  fasilitas_olahraga
+  fasilitas_peribadatan
 }
 
 // Models

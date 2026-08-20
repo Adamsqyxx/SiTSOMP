@@ -12,12 +12,13 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AuthButtons from "@/components/auth-buttons";
 
 const DESKTOP_NAV = [
   { label: "Beranda", href: "/", active: true },
   { label: "Layanan", href: "/layanan/surat", active: false },
   { label: "Peta", href: "/peta", active: false },
-  { label: "Profil", href: "/login", active: false },
+  { label: "Profil", href: "/profil", active: false },
 ] as const;
 
 export default function BerandaPage() {
@@ -59,14 +60,17 @@ export default function BerandaPage() {
             ))}
           </nav>
 
-          <Link
-            href="/login"
-            aria-label="Notifikasi"
-            className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-            title="Masuk untuk melihat notifikasi"
-          >
-            <Bell aria-hidden="true" className="w-5 h-5" />
-          </Link>
+          <div className="flex items-center gap-2 md:gap-3">
+            <AuthButtons className="hidden md:flex" />
+            <Link
+              href="/login"
+              aria-label="Notifikasi"
+              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+              title="Masuk untuk melihat notifikasi"
+            >
+              <Bell aria-hidden="true" className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
 
         {/* Mobile drawer */}
@@ -97,6 +101,9 @@ export default function BerandaPage() {
                   {item.label}
                 </Link>
               ))}
+              <div className="mt-auto pt-4 border-t border-outline-variant px-2">
+                <AuthButtons stacked />
+              </div>
             </nav>
           </div>
         )}

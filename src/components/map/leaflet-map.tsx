@@ -22,6 +22,10 @@ export interface MapFeature {
 
 interface LeafletMapProps {
   onSelect?: (feature: MapFeature | null) => void;
+  /** Fitur yang diminta fokus (mis. dari hasil pencarian) — peta di-zoom ke sini. */
+  focusFeature?: MapFeature | null;
+  /** Filter kategori aktif ("all" = tampil semua). */
+  filterCategory?: string;
 }
 
 // Marker tunggal dengan styling Material 3 (pin primary).
@@ -36,11 +40,17 @@ function makeIcon(): L.DivIcon {
   });
 }
 
-export default function LeafletMap({ onSelect }: LeafletMapProps) {
+export default function LeafletMap({
+  onSelect,
+  focusFeature,
+  filterCategory = "all",
+}: LeafletMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
+  const boundaryLayerRef = useRef<L.GeoJSON | null>(null);
 
+  // Inisialisasi peta sekali.
   useEffect(() => {
     if (!mapRef.current) return;
     if (mapInstance.current) return;
@@ -63,10 +73,71 @@ export default function LeafletMap({ onSelect }: LeafletMapProps) {
       map.remove();
       mapInstance.current = null;
       markersRef.current = [];
+      boundaryLayerRef.current = null;
     };
   }, []);
 
-  // Muat + render marker dari data, dan pasang subscription Realtime Supabase.
+  // Muat + render batas wilayah (highlight area kelurahan).
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map) return;
+
+    let active = true;
+
+    async function loadBoundary() {
+      try {
+        const res = await fetch("/api/peta/batas");
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        if (!active || !mapInstance.current) return;
+
+        if (boundaryLayerRef.current) {
+          boundaryLayerRef.current.remove();
+          boundaryLayerRef.current = null;
+        }
+
+        const fc = json.data as GeoJSON.FeatureCollection | undefined;
+        if (!fc || !fc.features?.length) return;
+
+        const current = mapInstance.current;
+        if (!current) return;
+        const layer = L.geoJSON(fc, {
+          style: () => ({
+            // Batas kelurahan: garis tegas tapi halus, isian tipis.
+            color: "#0059a8",
+            weight: 2.5,
+            opacity: 0.8,
+            fillColor: "#0059a8",
+            fillOpacity: 0.04,
+          }),
+          onEachFeature: (feature, layer) => {
+            const nama = feature?.properties?.nama as string | undefined;
+            if (nama) {
+              layer.bindTooltip(nama, { sticky: true, direction: "top" });
+            }
+          },
+        }).addTo(current);
+
+        boundaryLayerRef.current = layer;
+
+        // Fit peta ke batas kelurahan sekali (agar highlight langsung terlihat).
+        const b = layer.getBounds();
+        if (b.isValid() && !current.getBounds().contains(b)) {
+          current.fitBounds(b.pad(0.15));
+        }
+      } catch (err) {
+        console.error("Gagal memuat batas wilayah:", err);
+      }
+    }
+
+    loadBoundary();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Muat + render marker dari data, hormati filter kategori, dan pasang Realtime.
   useEffect(() => {
     const map = mapInstance.current;
     if (!map) return;
@@ -76,12 +147,14 @@ export default function LeafletMap({ onSelect }: LeafletMapProps) {
     function renderFeatures(list: MapFeature[]) {
       if (!active || !mapInstance.current) return;
       markersRef.current.forEach((m) => m.remove());
-      markersRef.current = list.map((f) => {
-        const marker = L.marker([f.latitude, f.longitude], { icon: makeIcon() })
-          .addTo(mapInstance.current!)
-          .on("click", () => onSelect?.(f));
-        return marker;
-      });
+      markersRef.current = list
+        .filter((f) => filterCategory === "all" || f.category === filterCategory)
+        .map((f) => {
+          const marker = L.marker([f.latitude, f.longitude], { icon: makeIcon() })
+            .addTo(mapInstance.current!)
+            .on("click", () => onSelect?.(f));
+          return marker;
+        });
     }
 
     async function load() {
@@ -95,26 +168,28 @@ export default function LeafletMap({ onSelect }: LeafletMapProps) {
       }
     }
 
-    // Muat data awal.
     load();
 
-    // Realtime: dengarkan perubahan pada tabel `lokasi` (INSERT/UPDATE/DELETE)
-    // lalu muat ulang marker. Jatuh diam-diam bila Realtime belum diaktifkan.
     const supabase = createClient();
     const channel = supabase
       .channel("lokasi-changes")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "lokasi" },
-        () => load()
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "lokasi" }, () => load())
       .subscribe();
 
     return () => {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, [onSelect]);
+  }, [onSelect, filterCategory]);
+
+  // Fokus ke fitur hasil pencarian (zoom + buka popup info).
+  useEffect(() => {
+    const map = mapInstance.current;
+    if (!map || !focusFeature) return;
+    map.flyTo([focusFeature.latitude, focusFeature.longitude], Math.max(map.getZoom(), 16), {
+      duration: 0.7,
+    });
+  }, [focusFeature]);
 
   const zoomIn = () => mapInstance.current?.zoomIn();
   const zoomOut = () => mapInstance.current?.zoomOut();

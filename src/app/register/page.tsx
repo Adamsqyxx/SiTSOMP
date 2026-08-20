@@ -96,9 +96,9 @@ export default function RegisterPage() {
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
               <Building2 aria-hidden="true" className="w-5 h-5 text-on-primary" />
             </div>
-            <h1 className="font-headline-lg text-headline-lg font-bold text-primary tracking-tight">
+            <Link href="/" className="font-headline-lg text-headline-lg font-bold text-primary tracking-tight">
               SiTSOMP
-            </h1>
+            </Link>
           </div>
           <h2 className="font-headline-md text-headline-md text-on-surface mb-4 max-w-sm">
             Portal Layanan Terpadu Kelurahan Tiro Sompe
@@ -128,9 +128,9 @@ export default function RegisterPage() {
             <div className="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center mb-3">
               <Building2 aria-hidden="true" className="w-6 h-6 text-on-primary-container" />
             </div>
-            <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">
+            <Link href="/" className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">
               SiTSOMP
-            </h1>
+            </Link>
             <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
               Portal Layanan Kelurahan
             </p>

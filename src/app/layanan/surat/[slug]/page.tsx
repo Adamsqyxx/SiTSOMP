@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
-  ArrowLeft,
   Bell,
   CheckCircle2,
   FileText,
@@ -24,7 +23,7 @@ const DESKTOP_NAV = [
   { label: "Beranda", icon: Home, href: "/", active: false },
   { label: "Layanan", icon: FileText, href: "/layanan/surat", active: true },
   { label: "Peta", icon: Map, href: "/peta", active: false },
-  { label: "Profil", icon: User, href: "/login", active: false },
+  { label: "Profil", icon: User, href: "/profil", active: false },
 ] as const;
 
 const SIDEBAR_ITEMS = [
@@ -217,7 +216,7 @@ export default function PengajuanPage() {
           >
             <Menu aria-hidden="true" className="w-5 h-5" />
           </button>
-          <span className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</span>
+          <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</Link>
         </div>
 
         <nav className="hidden md:flex items-center gap-2">
@@ -238,15 +237,17 @@ export default function PengajuanPage() {
           ))}
         </nav>
 
-        <button
-          type="button"
-          aria-label="Notifikasi"
-          onClick={() => router.push("/pengumuman")}
-          className="hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center text-on-surface-variant"
-          title="Lihat pengumuman"
-        >
-          <Bell aria-hidden="true" className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2 md:gap-3">
+          <button
+            type="button"
+            aria-label="Notifikasi"
+            onClick={() => router.push("/pengumuman")}
+            className="hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center text-on-surface-variant"
+            title="Lihat pengumuman"
+          >
+            <Bell aria-hidden="true" className="w-5 h-5" />
+          </button>
+        </div>
       </header>
 
       {/* Mobile drawer */}
@@ -268,14 +269,6 @@ export default function PengajuanPage() {
       )}
 
       <main className="flex-1 pt-16 w-full max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="inline-flex items-center gap-2 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors mb-6"
-        >
-          <ArrowLeft aria-hidden="true" className="w-4 h-4" /> Kembali
-        </button>
-
         <div className="mb-8">
           <span className="inline-block px-3 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded-full mb-3 uppercase tracking-wide">
             {(key || "surat").toUpperCase()}

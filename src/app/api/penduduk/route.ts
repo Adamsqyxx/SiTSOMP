@@ -25,7 +25,7 @@ export async function GET() {
     let alamatByKk: Record<string, string> = {};
     if (kkIds.length > 0) {
       try {
-        const kks = await prisma.kartuKeluarga.findMany({
+        const kks = await prisma.kartuKeluargaRelation.findMany({
           where: { id: { in: kkIds as string[] } },
           select: { id: true, alamat_lengkap: true },
         });

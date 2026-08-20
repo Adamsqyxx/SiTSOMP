@@ -2,21 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
-  Bell,
-  FileText,
-  LayoutDashboard,
-  LogOut,
-  Map,
   MapPin,
-  Menu,
   Search,
-  Settings,
-  Users,
+  User,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AuthButtons from "@/components/auth-buttons";
 
 // Daftar kategori fasilitas (dipetakan ke nilai enum JenisLokasi).
 const CATEGORIES = [
@@ -27,18 +20,16 @@ const CATEGORIES = [
   { label: "Ibadah", key: "ibadah", color: "text-secondary" },
 ] as const;
 
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: false },
-  { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
-  { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: false },
-  { label: "Peta Wilayah", icon: Map, href: "/peta", active: true },
-  { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
+const DESKTOP_NAV = [
+  { label: "Beranda", href: "/", active: false },
+  { label: "Layanan", href: "/layanan/surat", active: false },
+  { label: "Peta", href: "/peta", active: true },
+  { label: "Profil", href: "/profil", active: false },
 ] as const;
 
+// Batas RT/RW sementara disembunyikan dari legenda (data resmi belum tersedia).
 const LEGEND_ADMIN = [
-  { label: "Batas Kelurahan", className: "border-primary bg-primary/20" },
-  { label: "Batas RW", className: "border-secondary bg-secondary/20" },
-  { label: "Batas RT", className: "border-tertiary bg-tertiary/20" },
+  { label: "Batas Kelurahan", className: "border-[#0059a8] bg-[#0059a8]/10" },
 ] as const;
 
 const LEGEND_ROADS = [
@@ -56,51 +47,6 @@ interface Feature {
   longitude: number;
 }
 
-function SidebarContent({ onLogout }: { onLogout?: () => void }) {
-  return (
-    <>
-      <div className="px-6 py-6 border-b border-outline-variant flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center font-label-md font-bold text-on-primary-container overflow-hidden shrink-0">
-          AK
-        </div>
-        <div className="flex flex-col">
-          <span className="font-label-md text-label-md text-on-surface">Admin Kelurahan</span>
-          <span className="font-body-sm text-body-sm text-on-surface-variant">Tiro Sompe</span>
-        </div>
-      </div>
-      <div className="flex flex-col py-4 gap-2 overflow-y-auto">
-        {SIDEBAR_ITEMS.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 mx-2 rounded-full transition-all duration-200",
-              item.active
-                ? "bg-primary-container text-on-primary-container"
-                : "text-on-surface-variant hover:bg-surface-container-high"
-            )}
-          >
-            <item.icon aria-hidden="true" className="w-5 h-5" />
-            <span className="font-label-md text-label-md">{item.label}</span>
-          </Link>
-        ))}
-      </div>
-      <div className="mt-auto p-4 text-center border-t border-outline-variant">
-        <button
-          type="button"
-          aria-label="Keluar"
-          onClick={onLogout}
-          className="w-full flex items-center justify-center gap-2 py-2 rounded-full text-on-surface-variant hover:bg-error-container/60 hover:text-on-error-container transition-colors font-label-md text-label-md"
-        >
-          <LogOut aria-hidden="true" className="w-4 h-4" />
-          Keluar
-        </button>
-        <span className="font-label-sm text-label-sm text-outline block mt-1">v1.0.2</span>
-      </div>
-    </>
-  );
-}
-
 function GitPanelContent({
   features,
   query,
@@ -109,6 +55,7 @@ function GitPanelContent({
   setCategoryKey,
   feature,
   onClose,
+  onPick,
 }: {
   features: Feature[];
   query: string;
@@ -117,6 +64,7 @@ function GitPanelContent({
   setCategoryKey: (v: string) => void;
   feature: Feature | null;
   onClose?: () => void;
+  onPick?: (f: Feature) => void;
 }) {
   return (
     <>
@@ -136,7 +84,7 @@ function GitPanelContent({
             onChange={(e) => setQuery(e.target.value)}
           />
         </div>
-        {/* Hasil pencarian */}
+        {/* Hasil pencarian — klik = fokus peta ke lokasi */}
         {query.trim() && (
           <ul className="mt-3 space-y-1 max-h-48 overflow-y-auto">
             {features.length === 0 && (
@@ -148,12 +96,15 @@ function GitPanelContent({
               <li key={f.id}>
                 <button
                   type="button"
-                  onClick={() => onClose?.()}
+                  onClick={() => onPick?.(f)}
                   className="w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2"
                 >
                   <MapPin aria-hidden="true" className="w-4 h-4 text-primary shrink-0" />
                   <span className="font-body-sm text-body-sm text-on-surface truncate">
                     {f.name}
+                  </span>
+                  <span className="ml-auto font-label-sm text-label-sm text-outline shrink-0">
+                    {f.category}
                   </span>
                 </button>
               </li>
@@ -174,11 +125,11 @@ function GitPanelContent({
               className={cn(
                 "flex flex-col items-center justify-center p-3 rounded-xl transition-colors group",
                 categoryKey === cat.key
-                  ? "bg-primary-container text-on-primary-container border border-primary-container"
+                  ? "bg-primary text-on-primary border border-primary"
                   : "bg-surface-container-low border border-outline-variant hover:bg-surface-container-high"
               )}
             >
-              <span className={cn("font-label-sm text-label-sm", categoryKey === cat.key ? "text-on-primary-container" : "text-on-surface")}>
+              <span className={cn("font-label-sm text-label-sm", categoryKey === cat.key ? "text-on-primary" : "text-on-surface")}>
                 {cat.label}
               </span>
             </button>
@@ -187,6 +138,34 @@ function GitPanelContent({
         <p className="font-label-sm text-label-sm text-outline mt-3">
           {features.length} fasilitas ditampilkan
         </p>
+
+        {/* Hasil filter: list fasilitas yang cocok dengan kategori aktif */}
+        {categoryKey !== "all" && (
+          <ul className="mt-3 space-y-1 max-h-56 overflow-y-auto border-t border-outline-variant pt-3">
+            {features.length === 0 && (
+              <li className="font-body-sm text-body-sm text-on-surface-variant px-2 py-1">
+                Tidak ada fasilitas pada kategori ini.
+              </li>
+            )}
+            {features.map((f) => (
+              <li key={f.id}>
+                <button
+                  type="button"
+                  onClick={() => onPick?.(f)}
+                  className="w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2"
+                >
+                  <MapPin aria-hidden="true" className="w-4 h-4 text-primary shrink-0" />
+                  <span className="font-body-sm text-body-sm text-on-surface truncate">
+                    {f.name}
+                  </span>
+                  <span className="ml-auto font-label-sm text-label-sm text-outline shrink-0">
+                    {f.category}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Legend */}
@@ -299,22 +278,14 @@ function NavigationIcon() {
 }
 
 export default function PetaPage() {
-  const router = useRouter();
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selected, setSelected] = useState<Feature | null>(null);
+  const [focused, setFocused] = useState<Feature | null>(null);
   const [allFeatures, setAllFeatures] = useState<Feature[]>([]);
   const [query, setQuery] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [categoryKey, setCategoryKey] = useState<string>("all");
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
-    router.refresh();
-  };
-
   // Set pilihan dari query string kalau ada (?kategori=kesehatan).
-  // useRouter di client; pakai window.location langsung agar sederhana.
-  // Muat data fasilitas dari API untuk pencarian & filter client-side.
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
     if (loaded) return;
@@ -351,56 +322,58 @@ export default function PetaPage() {
 
   return (
     <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen">
-      {/* TopAppBar */}
-      <header className="bg-surface fixed top-0 w-full border-b border-outline-variant transition-colors duration-200 flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            aria-label="Menu"
-            onClick={() => setDrawerOpen(true)}
-            className="md:hidden text-primary hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center"
-          >
-            <Menu aria-hidden="true" className="w-5 h-5" />
-          </button>
-          <span className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</span>
-        </div>
-        <button
-          type="button"
-          aria-label="Notifikasi"
-          onClick={() => router.push("/pengumuman")}
-          className="text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center"
-          title="Lihat pengumuman"
-        >
-          <Bell aria-hidden="true" className="w-5 h-5" />
-        </button>
-      </header>
+      {/* TopAppBar — pola header publik SiTSOMP */}
+      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant transition-colors duration-200">
+        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50 max-w-max-width mx-auto">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
+              SiTSOMP
+            </Link>
+          </div>
 
-      {/* Mobile drawer: sidebar */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-          <nav className="absolute left-0 top-0 h-full w-[280px] bg-surface flex flex-col pt-16 shadow-xl">
+          <nav className="hidden md:flex gap-6 items-center">
+            {DESKTOP_NAV.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={cn(
+                  "font-label-md text-label-md transition-colors",
+                  item.active
+                    ? "text-primary font-semibold border-b-2 border-primary pb-1"
+                    : "text-on-surface-variant hover:text-primary"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2 md:gap-3">
             <button
               type="button"
-              aria-label="Tutup menu"
-              onClick={() => setDrawerOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low z-10"
+              aria-label="Cari"
+              onClick={() => setSearchOpen(true)}
+              className="md:hidden text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center"
+              title="Cari lokasi"
             >
-              <X aria-hidden="true" className="w-5 h-5" />
+              <Search aria-hidden="true" className="w-5 h-5" />
             </button>
-            <SidebarContent onLogout={handleLogout} />
-          </nav>
+            <AuthButtons className="hidden md:flex" />
+            <Link
+              href="/login"
+              aria-label="Profil"
+              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+              title="Masuk"
+            >
+              <User aria-hidden="true" className="w-5 h-5" />
+            </Link>
+          </div>
         </div>
-      )}
+      </header>
 
       <div className="flex flex-1 pt-16 h-full w-full">
-        {/* Desktop sidebar */}
-        <nav className="hidden md:flex flex-col bg-surface fixed left-0 top-0 h-full w-[280px] border-r border-outline-variant shadow-md z-40 pt-16">
-          <SidebarContent onLogout={handleLogout} />
-        </nav>
-
         {/* Main GIS work area */}
-        <main className="flex-1 flex ml-0 md:ml-[280px] h-full relative">
+        <main className="flex-1 flex h-full relative">
           {/* Persistent side panel (desktop) */}
           <aside className="hidden md:flex w-80 bg-surface border-r border-outline-variant flex-col h-full shadow-[2px_0_8px_-4px_rgba(0,0,0,0.1)] z-10">
             <GitPanelContent
@@ -411,13 +384,102 @@ export default function PetaPage() {
               setCategoryKey={setCategoryKey}
               feature={selected}
               onClose={() => setSelected(null)}
+              onPick={(f) => {
+                setSelected(f);
+                setFocused(f);
+              }}
             />
           </aside>
 
           {/* Map display area */}
           <section className="flex-1 relative bg-surface-dim overflow-hidden">
             {/* Interaktif Leaflet map */}
-            <LeafletMap onSelect={setSelected} />
+            <LeafletMap
+              onSelect={setSelected}
+              focusFeature={focused}
+              filterCategory={categoryKey}
+            />
+
+            {/* Mobile search overlay (muncul saat tombol Cari ditekan) */}
+            {searchOpen && (
+              <div className="absolute top-4 left-4 right-4 z-[600] md:hidden bg-surface rounded-xl border border-outline-variant shadow-lg p-4 max-h-[70vh] overflow-y-auto">
+                <div className="flex items-center gap-2 mb-3">
+                  <Search aria-hidden="true" className="w-5 h-5 text-on-surface-variant" />
+                  <input
+                    className="w-full bg-transparent outline-none font-body-md text-body-md text-on-surface placeholder:text-outline"
+                    placeholder="Cari fasilitas, RT/RW, jalan..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Escape") setSearchOpen(false);
+                    }}
+                    autoFocus
+                  />
+                  <button
+                    type="button"
+                    aria-label="Tutup pencarian"
+                    onClick={() => {
+                      setSearchOpen(false);
+                      setQuery("");
+                    }}
+                    className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-1"
+                  >
+                    <X aria-hidden="true" className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex gap-2 flex-wrap mb-3">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.key}
+                      type="button"
+                      onClick={() => setCategoryKey(cat.key)}
+                      className={cn(
+                        "px-3 py-1 rounded-full font-label-sm text-label-sm transition-colors",
+                        categoryKey === cat.key
+                          ? "bg-primary text-on-primary"
+                          : "bg-surface-container-low text-on-surface-variant border border-outline-variant"
+                      )}
+                    >
+                      {cat.label}
+                    </button>
+                  ))}
+                </div>
+                {query.trim() === "" && categoryKey === "all" ? (
+                  <p className="font-body-sm text-body-sm text-on-surface-variant px-1 py-2">
+                    Ketik nama atau pilih kategori untuk memfilter fasilitas.
+                  </p>
+                ) : filtered.length === 0 ? (
+                  <p className="font-body-sm text-body-sm text-on-surface-variant px-1 py-2">
+                    Tidak ada hasil.
+                  </p>
+                ) : (
+                  <ul className="space-y-1">
+                    {filtered.map((f) => (
+                      <li key={f.id}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelected(f);
+                            setFocused(f);
+                            setSearchOpen(false);
+                            setQuery("");
+                          }}
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2"
+                        >
+                          <MapPin aria-hidden="true" className="w-4 h-4 text-primary shrink-0" />
+                          <span className="font-body-sm text-body-sm text-on-surface truncate">
+                            {f.name}
+                          </span>
+                          <span className="ml-auto font-label-sm text-label-sm text-outline shrink-0">
+                            {f.category}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
 
             {/* Selected feature card (mobile overlay) */}
             {selected && (

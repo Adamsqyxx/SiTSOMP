@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, Download, Eye, FileText, LayoutDashboard, Megaphone, Menu, Route, Settings, Users, X } from "lucide-react";
+import {
+  Download,
+  Eye,
+  Megaphone,
+  User,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import AuthButtons from "@/components/auth-buttons";
 
-const NAV_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: true },
-  { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
-  { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: false },
-  { label: "Peta Wilayah", icon: Route, href: "/peta", active: false },
-  { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
+const DESKTOP_NAV = [
+  { label: "Beranda", href: "/", active: false },
+  { label: "Layanan", href: "/layanan/surat", active: false },
+  { label: "Peta", href: "/peta", active: false },
+  { label: "Profil", href: "/profil", active: false },
 ] as const;
 
 interface TimelineStep {
@@ -100,60 +106,8 @@ interface UserInfo {
   role?: string | null;
 }
 
-function UserBadge({ user }: { user: UserInfo | null }) {
-  const initials = (user?.nama_lengkap?.trim() || user?.email || "?").trim().slice(0, 2).toUpperCase();
-  return (
-    <div className="flex items-center gap-4">
-      <div className="w-12 h-12 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-label-md font-bold shrink-0 overflow-hidden">
-        {initials || "AK"}
-      </div>
-      <div className="flex flex-col min-w-0">
-        <span className="font-label-md text-label-md font-bold text-on-surface truncate">
-          {user?.nama_lengkap || "Admin Kelurahan"}
-        </span>
-        <span className="font-label-sm text-label-sm text-on-surface-variant truncate">
-          {user?.email || "Tiro Sompe"}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-function SidebarContent({ user }: { user: UserInfo | null }) {
-  return (
-    <>
-      <div className="p-6 border-b border-outline-variant flex items-center gap-4">
-        <UserBadge user={user} />
-      </div>
-
-      <div className="flex flex-col py-4 gap-2 flex-grow overflow-y-auto">
-        {NAV_ITEMS.map((item) => (
-          <a
-            key={item.label}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 mx-2 rounded-full transition-all duration-200",
-              item.active
-                ? "bg-primary-container text-on-primary-container"
-                : "text-on-surface-variant hover:bg-surface-container-high"
-            )}
-          >
-            <item.icon aria-hidden="true" className="w-5 h-5" />
-            <span className="font-label-md text-label-md">{item.label}</span>
-          </a>
-        ))}
-      </div>
-
-      <div className="p-4 border-t border-outline-variant text-center">
-        <span className="font-label-sm text-label-sm text-on-surface-variant">v1.0.2</span>
-      </div>
-    </>
-  );
-}
-
 export default function DashboardPage() {
   const router = useRouter();
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [user, setUser] = useState<UserInfo | null>(null);
 
   useEffect(() => {
@@ -173,84 +127,70 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body-md text-body-md h-screen flex overflow-hidden">
-      {/* Sidebar (desktop) */}
-      <nav className="hidden md:flex flex-col bg-surface border-r border-outline-variant shadow-md fixed left-0 top-0 h-full w-[280px] z-40">
-        <SidebarContent user={user} />
-      </nav>
-
-      {/* Mobile drawer */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setDrawerOpen(false)}
-            aria-hidden="true"
-          />
-          <nav className="absolute left-0 top-0 h-full w-[280px] bg-surface flex flex-col shadow-xl">
-            <button
-              type="button"
-              aria-label="Tutup menu"
-              onClick={() => setDrawerOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low z-10"
-            >
-              <X aria-hidden="true" className="w-5 h-5" />
-            </button>
-            <SidebarContent user={user} />
-          </nav>
-        </div>
-      )}
-
-      {/* Main content */}
-      <main className="flex-grow flex flex-col md:ml-[280px] h-full overflow-hidden">
-        {/* TopAppBar */}
-        <header className="bg-surface flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-30 border-b border-border-subtle shrink-0">
+    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+      {/* TopAppBar — pola header publik SiTSOMP */}
+      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant transition-colors duration-200">
+        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50 max-w-max-width mx-auto">
           <div className="flex items-center gap-4">
-            <button
-              type="button"
-              aria-label="Menu"
-              onClick={() => setDrawerOpen(true)}
-              className="md:hidden text-on-surface-variant p-2 hover:bg-surface-container-low rounded-full transition-colors duration-200"
-            >
-              <Menu aria-hidden="true" className="w-5 h-5" />
-            </button>
-            <span className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</span>
+            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
+              SiTSOMP
+            </Link>
           </div>
-          <button
-            type="button"
-            aria-label="Notifikasi"
-            onClick={() => router.push("/pengumuman")}
-            className="text-on-surface-variant p-2 hover:bg-surface-container-low rounded-full transition-colors duration-200 relative"
-            title="Lihat pengumuman"
-          >
-            <Bell aria-hidden="true" className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-danger rounded-full border border-surface" />
-          </button>
-        </header>
 
-        {/* Scrollable content */}
-        <div className="flex-grow overflow-y-auto p-margin-mobile md:p-margin-desktop bg-background">
-          <div className="max-w-max-width mx-auto flex flex-col gap-8">
-            {/* Page header */}
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
-                <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard Warga</h1>
-                <p className="font-body-md text-body-md text-on-surface-variant mt-2">
-                  Pantau status pengajuan administrasi dan notifikasi terkini Anda.
-                </p>
-              </div>
-              {user && (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="font-label-md text-label-md text-on-surface-variant hover:text-danger border border-outline-variant hover:border-danger px-4 py-2 rounded-full transition-colors"
-                >
-                  Keluar
-                </button>
-              )}
+          <nav className="hidden md:flex gap-6 items-center">
+            {DESKTOP_NAV.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className={cn(
+                  "font-label-md text-label-md transition-colors",
+                  item.active
+                    ? "text-primary font-semibold border-b-2 border-primary pb-1"
+                    : "text-on-surface-variant hover:text-primary"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2 md:gap-3">
+            <AuthButtons className="hidden md:flex" />
+            <Link
+              href="/login"
+              aria-label="Profil"
+              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+              title="Masuk"
+            >
+              <User aria-hidden="true" className="w-5 h-5" />
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="flex-grow pt-16 md:pt-24 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
+        <div className="max-w-max-width mx-auto flex flex-col gap-8">
+          {/* Page header */}
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+                            <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard Warga</h1>
+              <p className="font-body-md text-body-md text-on-surface-variant mt-2">
+                Pantau status pengajuan administrasi dan notifikasi terkini Anda.
+              </p>
             </div>
+            {user && (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="font-label-md text-label-md text-on-surface-variant hover:text-danger border border-outline-variant hover:border-danger px-4 py-2 rounded-full transition-colors"
+              >
+                Keluar
+              </button>
+            )}
+          </div>
 
-            {/* Bento grid */}
+          {/* Bento grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left column */}
               <div className="lg:col-span-2 flex flex-col gap-6">
@@ -441,7 +381,6 @@ export default function DashboardPage() {
                 <span className="hover:text-primary underline transition-opacity duration-150">Peta Situs</span>
               </div>
             </footer>
-          </div>
         </div>
       </main>
     </div>
