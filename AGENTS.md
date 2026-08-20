@@ -9,7 +9,8 @@ Sistem Informasi Terpadu Kelurahan Tiro Sompe (Kota Parepare, Sulawesi Selatan).
 - **Backend:** Next.js API Routes (fullstack, no separate server)
 - **ORM:** Prisma 7.9.1 (ESM) + `@prisma/adapter-pg`; generated client di `src/generated/prisma`
 - **Database:** Supabase PostgreSQL + PostGIS (live)
-- **Auth:** Supabase Auth + @supabase/ssr — **terintegrasi** (login/logout/me/register + middleware)
+- **Auth:** NextAuth (Auth.js) v5 beta (Credentials + JWT session) + bcryptjs — **menggantikan Supabase Auth** (register/login/logout/me/middleware)
+- **Supabase:** HANYA untuk realtime peta (`supabase-realtime` subscribe di `leaflet-map.tsx`) + DB Postgres (Prisma). `@supabase/ssr` TIDAK dipakai lagi.
 - **UI:** shadcn/ui + Lucide React + sonner (toast)
 
 ## Commands
@@ -51,10 +52,10 @@ src/
     ui/                   # shadcn: button, input, label
   lib/
     prisma.ts             # PrismaClient singleton + pg.Pool (adapter)
-    supabase-client.ts    # Browser client (ANON_KEY)
-    supabase-server.ts    # Server client + updateSession (middleware)
-    supabase-admin.ts     # Admin client (SERVICE_ROLE_KEY)
-  middleware.ts           # Session refresh + proteksi route
+    supabase-client.ts    # Browser client (realtime peta saja — ANON_KEY)
+  auth.ts                 # NextAuth v5 config (Credentials + JWT)
+  middleware.ts           # Proteksi route via auth()
+  types/next-auth.d.ts    # Module augmentation Session/User/JWT
 prisma/
   schema.prisma           # 15 models, 10 enums; output → src/generated/prisma
   config.ts → prisma.config.ts  # Config CLI (root), baca .env
@@ -68,9 +69,9 @@ Runtime Next.js membaca **`.env.local`**; **Prisma CLI (db push/generate) membac
 
 ```env
 DATABASE_URL="postgresql://..."            # .env + .env.local
-NEXT_PUBLIC_SUPABASE_URL="https://..."     # .env.local
-NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."     # .env.local
-SUPABASE_SERVICE_ROLE_KEY="eyJ..."         # .env.local (server-only)
+NEXT_PUBLIC_SUPABASE_URL="https://..."     # .env.local — realtime peta saja
+NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJ..."     # .env.local — realtime peta saja
+AUTH_SECRET="..."                          # .env.local — NextAuth JWT secret (openssl rand -base64 32)
 ```
 
 ## Conventions
@@ -85,9 +86,10 @@ SUPABASE_SERVICE_ROLE_KEY="eyJ..."         # .env.local (server-only)
 
 ## Auth & Protected Routes
 
-- Middleware (`src/middleware.ts`) refresh session tiap request via `updateSession`.
-- Path terproteksi (redirect ke `/login?next=...`): `/dashboard`, `/peta`, `/layanan`.
-- Sudah login → akses `/login`/`/register` diarahkan ke `/dashboard`.
+- Auth: **NextAuth (Auth.js) v5 beta** — `src/auth.ts` (Credentials Provider + JWT session), route handler di `src/app/api/auth/[...nextauth]/route.ts`, secret `AUTH_SECRET`.
+- Credentials: NIK (16 digit → email sintetis `<NIK>@sitsomp.id`) atau email + password. Password di-hash `bcryptjs` di tabel `users.password_hash`.
+- Route API custom (tetap dipakai client): `/api/auth/me` (session), `/api/auth/login`, `/api/auth/logout`, `/api/auth/register` (buat user + hash).
+- Middleware (`src/middleware.ts`) proteksi via `auth()`: `/dashboard`, `/peta`, `/layanan` tanpa session → redirect `/login?next=...`. Sudah login → `/login`/`/register` dialihkan ke `/dashboard`.
 - Registrasi memakai **email sintetis `<NIK>@sitsomp.id`** (form register tidak punya field email) — login pakai NIK tersebut sebagai identifier.
 - `/profil` publik (tanpa proteksi); ambil data user dari `/api/auth/me`.
 
@@ -128,7 +130,7 @@ npx prisma db push
 ## Deployment
 
 **Primary:** Vercel (`vercel-build` script = `prisma generate && next build`).
-Required production env vars: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server-only), `RESEND_API_KEY` + `FONNTE_API_KEY` (saat diimplementasikan).
+Required production env vars: `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (realtime peta), `AUTH_SECRET`, `RESEND_API_KEY` + `FONNTE_API_KEY` (saat diimplementasikan).
 
 <!-- BEGIN:nextjs-agent-rules -->
 

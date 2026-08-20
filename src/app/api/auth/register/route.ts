@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase-admin";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
+// Registrasi warga: buat user di tabel `users` (Prisma) dengan password_hash
+// bcrypt. Login memakai Credentials Provider NextAuth (lihat src/auth.ts).
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
     const { email, password, nik, nama_lengkap, nomor_hp } = body ?? {};
 
     // Validasi dasar
@@ -23,8 +25,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Nomor telepon tidak valid." }, { status: 400 });
     }
 
-    // Cek duplikat NIK lebih dulu agar tidak meninggalkan user Supabase yatim
-    // (sudah dibuat di step 1 tapi gagal insert Prisma karena duplikat).
+    // Cek duplikat NIK/email lebih dulu.
     const existing = await prisma.user.findFirst({
       where: { OR: [{ nik }, { email }] },
       select: { nik: true, email: true },
@@ -37,59 +38,25 @@ export async function POST(req: Request) {
       );
     }
 
-    // 1) Daftarkan user di Supabase Auth (service role agar auto-confirm).
-    const admin = createAdminClient();
-    if (!admin) {
-      return NextResponse.json(
-        { error: "Registrasi belum tersedia: service role key belum dikonfigurasi." },
-        { status: 500 }
-      );
-    }
+    // Hash password (bcryptjs, 10 rounds).
+    const passwordHash = await bcrypt.hash(String(password), 10);
 
-    const { data: authUser, error: signUpError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { nama_lengkap, nik: nik ?? null, nomor_hp: nomor_hp ?? null },
+    const user = await prisma.user.create({
+      data: {
+        email: String(email).trim().toLowerCase(),
+        nik: nik ?? null,
+        nama_lengkap: String(nama_lengkap).trim(),
+        nomor_hp: nomor_hp ?? null,
+        password_hash: passwordHash,
+        role: "warga",
+        is_active: true,
+      },
     });
 
-    if (signUpError) {
-      // Error umum: email sudah terdaftar
-      if (signUpError.message?.toLowerCase().includes("already registered")) {
-        return NextResponse.json({ error: "Email ini sudah terdaftar." }, { status: 409 });
-      }
-      return NextResponse.json({ error: signUpError.message }, { status: 400 });
-    }
-    const supabaseUserId = authUser.user?.id;
-    if (!supabaseUserId) {
-      return NextResponse.json({ error: "Gagal membuat akun Supabase." }, { status: 500 });
-    }
-
-    // 2) Buat baris User di tabel `users` (Prisma) terhubung via email (unik).
-    try {
-      const user = await prisma.user.create({
-        data: {
-          email,
-          nik: nik ?? null,
-          nama_lengkap,
-          nomor_hp: nomor_hp ?? null,
-          role: "warga",
-          is_active: true,
-        },
-      });
-      return NextResponse.json(
-        { message: "Akun berhasil dibuat. Silakan masuk.", user: { id: user.id, email: user.email } },
-        { status: 201 }
-      );
-    } catch (dbErr) {
-      // User Supabase sudah dibuat; kalau insert Prisma gagal (mis. email duplikat
-      // di tabel users), balas error data — tidak menghapus user Supabase.
-      console.error("Gagal insert user ke Prisma:", dbErr);
-      return NextResponse.json(
-        { error: "Akun dibuat tapi gagal menyimpan data profil. Hubungi admin." },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(
+      { message: "Akun berhasil dibuat. Silakan masuk.", user: { id: user.id, email: user.email } },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("POST /api/auth/register:", err);
     return NextResponse.json({ error: "Terjadi kesalahan server." }, { status: 500 });

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { createClient } from "@/lib/supabase-server";
+import { auth } from "@/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,18 +26,16 @@ const CreateComplaintSchema = z.object({
 
 export async function GET() {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const session = await auth();
+    const userId = session?.user?.id ?? null;
 
     // Hanya pengguna login yang boleh melihat daftar pengaduannya sendiri.
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: "Anda harus masuk terlebih dahulu." }, { status: 401 });
     }
 
     const complaints = await prisma.complaint.findMany({
-      where: { pelapor_id: user.id },
+      where: { pelapor_id: userId },
       orderBy: { created_at: "desc" },
       select: {
         id: true,
@@ -63,12 +61,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const session = await auth();
+    const userId = session?.user?.id ?? null;
 
-    if (!user) {
+    if (!userId) {
       return NextResponse.json({ error: "Anda harus masuk terlebih dahulu." }, { status: 401 });
     }
 
@@ -92,7 +88,7 @@ export async function POST(req: Request) {
     const complaint = await prisma.complaint.create({
       data: {
         nomor_tiket: nomorTiket,
-        pelapor_id: user.id,
+        pelapor_id: userId,
         kategori,
         judul: judul.trim(),
         deskripsi: deskripsi.trim(),

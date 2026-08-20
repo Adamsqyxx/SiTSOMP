@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
+import { signOut } from "@/auth";
 
 export const runtime = "nodejs";
 
 export async function POST() {
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
+  // signOut dari route handler: hapus cookie session (redirect: false = JSON).
+  await signOut({ redirect: false });
   return NextResponse.json({ message: "Logout berhasil" });
 }

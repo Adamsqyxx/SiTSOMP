@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
+import { auth } from "@/auth";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
+// GET /api/auth/me — ambil user dari session NextAuth (null kalau belum login).
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ user: null });
-  }
+  const session = await auth();
+  const user = session?.user ?? null;
 
   return NextResponse.json({
-    user: {
-      id: user.id,
-      email: user.email,
-      nama_lengkap:
-        (user.user_metadata?.nama_lengkap as string) ??
-        (user.email as string),
-      role: (user.user_metadata?.role as string) ?? "warga",
-    },
+    user: user
+      ? {
+          id: user.id,
+          email: user.email ?? null,
+          nama_lengkap: user.nama_lengkap ?? user.name ?? null,
+          role: user.role ?? "warga",
+          nik: user.nik ?? null,
+        }
+      : null,
   });
 }

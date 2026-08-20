@@ -93,18 +93,16 @@ enum JenisLokasi {
 // Models
 
 model User {
-  id                String    @id @default(cuid())
-  nik               String?   @unique
-  nama_lengkap      String
-  email             String    @unique
-  nomor_hp          String?
-  password_hash     String?
-  role              UserRole  @default(warga)
-  is_active         Boolean   @default(true)
-  email_verified_at DateTime?
-  last_login_at     DateTime?
-  created_at        DateTime  @default(now())
-  updated_at        DateTime  @updatedAt
+  id            String    @id @default(cuid())
+  nik           String?   @unique
+  nama_lengkap  String
+  email         String    @unique
+  nomor_hp      String?
+  password_hash String?
+  role          UserRole  @default(warga)
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 
   @@map("users")
 }
