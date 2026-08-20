@@ -64,9 +64,9 @@ export default function LoginPage() {
           <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldCheck aria-hidden="true" className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+          <Link href="/" className="font-headline-lg text-headline-lg text-primary tracking-tight">
             SiTSOMP
-          </h1>
+          </Link>
           <p className="font-body-md text-body-md text-on-surface-variant mt-2">
             Sistem Informasi Kelurahan Tiro Sompe
           </p>
@@ -90,7 +90,7 @@ export default function LoginPage() {
                 className="block w-full pl-10 pr-3 py-3 bg-surface-muted border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-colors outline-none"
                 id="identifier"
                 name="identifier"
-                placeholder="Masukkan NIK atau Email yang terdaftar"
+                placeholder="Masukkan NIK (16 digit) atau email Anda"
                 required
                 type="text"
                 value={identifier}
@@ -185,8 +185,9 @@ export default function LoginPage() {
           <div className="flex items-start gap-3 bg-surface-container-low p-3 rounded-lg border border-outline-variant/30">
             <Info aria-hidden="true" className="w-5 h-5 text-info mt-0.5" />
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Gunakan NIK Anda untuk mengakses layanan administrasi kependudukan.
-              Jika mengalami kendala, hubungi kantor kelurahan.
+              Gunakan NIK (Nomor Induk Kependudukan) Anda untuk masuk — sama
+              seperti saat mendaftar. Jika mengalami kendala, hubungi kantor
+              kelurahan.
             </p>
           </div>
         </div>
