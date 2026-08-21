@@ -12,6 +12,17 @@ function createPrisma() {
   const pool = new pg.Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false },
+    // Hardening untuk Supabase pooler: gagal cepat saat koneksi mati diam-diam
+    // (jangan biarkan request menggantung selamanya), dan jaga koneksi tetap
+    // hidup lewat NAT/firewall.
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 30_000,
+    keepAlive: true,
+  });
+  // Error pada koneksi idle (mis. diputus pooler) tidak boleh menjatuhkan
+  // proses — pool akan membuat koneksi baru pada query berikutnya.
+  pool.on("error", (err) => {
+    console.error("[prisma] pg pool idle-client error:", err.message);
   });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
