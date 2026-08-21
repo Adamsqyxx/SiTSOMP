@@ -7,6 +7,9 @@ import { authConfig } from "@/auth.config";
 const { auth } = NextAuth(authConfig);
 
 const PROTECTED_PREFIXES = ["/dashboard", "/peta", "/layanan"];
+// Halaman khusus admin/staf kelurahan.
+const ADMIN_PREFIX = "/admin";
+const ADMIN_ROLES = ["super_admin", "lurah", "sekretaris", "petugas"];
 
 export async function middleware(request: NextRequest) {
   const session = await auth();
@@ -15,12 +18,30 @@ export async function middleware(request: NextRequest) {
   const needsAuth = PROTECTED_PREFIXES.some(
     (p) => pathname === p || pathname.startsWith(`${p}/`)
   );
+  const needsAdmin =
+    pathname === ADMIN_PREFIX || pathname.startsWith(`${ADMIN_PREFIX}/`);
 
   // Belum login → redirect ke /login?next=<path>
-  if (needsAuth && !session?.user) {
+  if ((needsAuth || needsAdmin) && !session?.user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("next", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // /admin hanya untuk role staf; warga biasa → dashboard warga.
+  if (needsAdmin && session?.user) {
+    const role = (session.user as { role?: string }).role ?? "warga";
+    if (!ADMIN_ROLES.includes(role)) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
+  // Admin yang buka /dashboard dialihkan ke dashboard admin.
+  if (pathname === "/dashboard" && session?.user) {
+    const role = (session.user as { role?: string }).role ?? "warga";
+    if (ADMIN_ROLES.includes(role)) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
   }
 
   // Sudah login → jangan biarkan buka /login atau /register

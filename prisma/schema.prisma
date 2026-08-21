@@ -324,6 +324,27 @@ model Notifikasi {
   @@map("notifikasi")
 }
 
+// Arsip hasil import data penduduk dari file spreadsheet (.xlsx/.xlsm/.csv/
+// .ods/.xlsb). Kolom disimpan dinamis (JSON) mengikuti isi file yang diupload
+// admin; salinan juga dipetakan ke tabel Penduduk/kartu_keluarga bila memungkinkan.
+model ImportPenduduk {
+  id            String   @id @default(cuid())
+  nama_file     String
+  format_file   String
+  ukuran_bytes  Int      @default(0)
+  total_baris   Int      @default(0)
+  baris_baru    Int      @default(0)
+  baris_update  Int      @default(0)
+  baris_gagal   Int      @default(0)
+  kolom         String?
+  data_rows     String?
+  errors        String?
+  diupload_oleh String?
+  created_at    DateTime @default(now())
+
+  @@map("import_penduduk")
+}
+
 // Pilar #3: Peta & Informasi Wilayah (FR-4).
 // - fasilitas_umum / kantor_kelurahan: titik, diisi latitude+longitude
 // - batas_rt / batas_rw: poligon, diisi kolom `geom` via $executeRaw

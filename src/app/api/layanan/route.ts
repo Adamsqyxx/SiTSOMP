@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-// Draft pengajuan layanan surat (belum lengkap): menerima data formulir dan
-// menyimpannya. Perlu penyesuaian dengan model ServiceRequest/JenisSurat saat
-// alur penuh diterapkan.
-
+// POST /api/layanan — kirim pengajuan surat (warga login).
+// Body: { kode, jenis?, data }. Permohonan tersimpan di tabel service_requests
+// dengan status awal menunggu_verifikasi, lalu diproses admin di /admin.
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { kode, jenis, data } = body ?? {};
+    const kode = typeof body?.kode === "string" ? body.kode.trim().toLowerCase() : "";
+    const jenis = typeof body?.jenis === "string" ? body.jenis.trim() : "";
+    const data = body?.data;
 
     if (!kode || !data || typeof data !== "object") {
       return NextResponse.json(
@@ -19,52 +22,52 @@ export async function POST(req: Request) {
       );
     }
 
-    // Cari jenis surat berdasarkan kode (kolom `kode` di tabel jenis_surat).
-    // Kalau belum ada barisnya, fallback ke kode itu sendiri.
-    let jenisSurat = null;
-    try {
-      jenisSurat = await prisma.jenisSurat.findUnique({
-        where: { kode },
-      });
-    } catch {
-      jenisSurat = null;
-    }
-
-    // Seed dasar tabel jenis_surat bila kosong (SKTM/SKU/DOM/SKM sudah
-    // didefinisikan sebagai kode).
-    if (!jenisSurat) {
-      try {
-        const seeded = await prisma.jenisSurat.create({
-          data: {
-            kode,
-            nama: jenis ?? kode.toUpperCase(),
-            deskripsi: `Pengajuan ${jenis ?? kode.toUpperCase()}`,
-            is_active: true,
-          },
-        });
-        jenisSurat = seeded;
-      } catch {
-        jenisSurat = null;
-      }
-    }
-
-    if (!jenisSurat) {
+    const session = await auth();
+    if (!session?.user?.id) {
       return NextResponse.json(
-        {
-          error:
-            "Jenis surat belum tersedia di sistem. Hubungi staf kelurahan untuk pengajuan manual.",
-        },
-        { status: 422 }
+        { error: "Silakan masuk terlebih dahulu untuk mengajukan surat." },
+        { status: 401 }
       );
     }
 
-    // TODO: alur penuh — buat ServiceRequest + DokumenPermohonan, validasi
-    // login (pemohon_id dari session), dan nomor_permohonan otomatis.
+    // Cari/buat jenis surat berdasarkan kode.
+    let jenisSurat = await prisma.jenisSurat.findUnique({ where: { kode } });
+    if (!jenisSurat) {
+      jenisSurat = await prisma.jenisSurat.create({
+        data: {
+          kode,
+          nama: jenis || kode.toUpperCase(),
+          deskripsi: `Pengajuan ${jenis || kode.toUpperCase()}`,
+          is_active: true,
+          estimasi_hari_proses: 3,
+        },
+      });
+    }
+
+    // Nama pemohon dari form; kalau kosong pakai nama akun.
+    const formData = data as Record<string, unknown>;
+    const namaPemohon =
+      typeof formData.nama_lengkap === "string" && formData.nama_lengkap.trim()
+        ? formData.nama_lengkap.trim()
+        : (session.user.nama_lengkap ?? session.user.name ?? "(tanpa nama)");
+
+    const nomorPermohonan = await buatNomorUnik();
+
+    const created = await prisma.serviceRequest.create({
+      data: {
+        nomor_permohonan: nomorPermohonan,
+        pemohon_id: session.user.id,
+        jenis_surat_id: jenisSurat.id,
+        form_data: JSON.stringify({ ...formData, _nama_pemohon: namaPemohon }),
+        status: "menunggu_verifikasi",
+      },
+    });
+
     return NextResponse.json(
       {
-        message: "Pengajuan diterima (pratinjau). Data tersimpan di sistem.",
-        kode,
-        jenis: jenisSurat.nama,
+        message: "Pengajuan diterima. Pantau status di Dashboard.",
+        nomor_permohonan: created.nomor_permohonan,
+        id: created.id,
       },
       { status: 201 }
     );
@@ -75,4 +78,22 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+}
+
+async function buatNomorUnik(): Promise<string> {
+  for (let i = 0; i < 5; i++) {
+    const now = new Date();
+    const tanggal = [
+      now.getFullYear(),
+      String(now.getMonth() + 1).padStart(2, "0"),
+      String(now.getDate()).padStart(2, "0"),
+    ].join("");
+    const acak = Math.floor(1000 + Math.random() * 9000);
+    const kandidat = `REG-${tanggal}-${acak}`;
+    const ada = await prisma.serviceRequest.findUnique({
+      where: { nomor_permohonan: kandidat },
+    });
+    if (!ada) return kandidat;
+  }
+  throw new Error("Gagal membuat nomor permohonan unik");
 }
