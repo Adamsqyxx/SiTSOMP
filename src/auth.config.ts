@@ -28,5 +28,25 @@ export const authConfig = {
     authorized() {
       return true;
     },
+    // Salin data user ke token saat login — dipakai juga oleh middleware
+    // (Edge) agar session.user.role tersedia untuk proteksi route /admin.
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = (user as { role?: string }).role ?? "warga";
+        token.nik = (user as { nik?: string | null }).nik ?? null;
+        token.nama_lengkap = (user as { name?: string | null }).name ?? null;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = (token.id as string) ?? "";
+        session.user.role = (token.role as string) ?? "warga";
+        session.user.nik = (token.nik as string | null) ?? null;
+        session.user.nama_lengkap = (token.nama_lengkap as string | null) ?? null;
+      }
+      return session;
+    },
   },
 } satisfies NextAuthConfig;
