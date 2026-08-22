@@ -25,6 +25,10 @@ import dynamicImport from "next/dynamic";
 const KontenEditor = dynamicImport(
   () => import("@/components/admin/konten-editor")
 );
+// Editor berita/pengumuman (CRUD informasi publik) — juga lazy.
+const InformasiEditor = dynamicImport(
+  () => import("@/components/admin/informasi-editor")
+);
 
 // ── Konstanta tampilan ────────────────────────────────────────────────
 const FORMAT_DITERIMA = [".xlsx", ".xlsm", ".csv", ".ods", ".xlsb"];
@@ -860,6 +864,7 @@ export default function AdminPanel() {
         {tab === "konten" && (
           <section className="flex flex-col gap-4 md:gap-5">
             <KontenEditor />
+            <InformasiEditor />
           </section>
         )}
       </div>

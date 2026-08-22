@@ -1,42 +1,14 @@
-"use client";
-
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
+import { getInformasiPublik, JENIS_INFO_LABEL } from "@/lib/informasi-publik";
 
-const POSTS = [
-  {
-    tag: "INFO KELURAHAN",
-    tagClass: "text-primary",
-    date: "Hari ini",
-    title: "Jadwal Pemadaman Listrik",
-    desc: "Akan dilakukan pemeliharaan jaringan pada area RW 03 dan RW 04 mulai pukul 09.00 - 14.00 WITA.",
-  },
-  {
-    tag: "LAYANAN KESEHATAN",
-    tagClass: "text-info",
-    date: "Kemarin",
-    title: "Posyandu Balita Oktober",
-    desc: "Kegiatan Posyandu Mawar akan dilaksanakan di Balai Pertemuan pada tanggal 15 Oktober 2024.",
-  },
-  {
-    tag: "PERINGATAN DINI",
-    tagClass: "text-warning",
-    date: "10 Okt",
-    title: "Waspada Genangan Air",
-    desc: "Curah hujan tinggi diprediksi beberapa hari ke depan. Warga diharap membersihkan saluran air.",
-  },
-  {
-    tag: "KEGIATAN",
-    tagClass: "text-secondary",
-    date: "05 Okt",
-    title: "Kerja Bakti Lingkungan",
-    desc: "Kerja bakti membersihkan saluran drainase di seluruh RW akan dilaksanakan Sabtu pagi.",
-  },
-] as const;
+export const dynamic = "force-dynamic";
 
-export default function PengumumanPage() {
+export default async function PengumumanPage() {
+  const { items } = await getInformasiPublik();
+
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />
@@ -45,7 +17,7 @@ export default function PengumumanPage() {
         <div className="mb-8">
           <BackButton fallbackHref="/" className="mb-3 -ml-1 md:hidden" />
           <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-2">
-            Informasi & Pengumuman
+            Informasi &amp; Pengumuman
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">
             Informasi resmi dari Pemerintah Kelurahan Tiro Sompe untuk warga.
@@ -53,13 +25,15 @@ export default function PengumumanPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {POSTS.map((p) => (
+          {items.map((p) => (
             <article
               key={p.title}
               className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 hover:border-primary transition-colors"
             >
               <div className="flex justify-between items-start mb-2">
-                <span className={cn("font-label-sm text-label-sm font-bold", p.tagClass)}>{p.tag}</span>
+                <span className={cn("font-label-sm text-label-sm font-bold", p.tagClass)}>
+                  {JENIS_INFO_LABEL[p.jenis as keyof typeof JENIS_INFO_LABEL] ?? "INFO"}
+                </span>
                 <span className="font-label-sm text-label-sm text-outline">{p.date}</span>
               </div>
               <h2 className="font-headline-sm text-headline-sm text-on-surface mb-2">{p.title}</h2>
