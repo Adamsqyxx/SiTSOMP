@@ -36,6 +36,16 @@ export async function proxy(request: NextRequest) {
     }
   }
 
+  // Staf tidak mengajukan surat — halaman pengajuan dialihkan ke panel admin.
+  // Mencakup /layanan/surat dan form pengajuan per-jenis (/layanan/surat/<slug>).
+  if (
+    session?.user &&
+    pathname === "/layanan/surat" &&
+    ADMIN_ROLES.includes((session.user as { role?: string }).role ?? "")
+  ) {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
   // Admin yang buka /dashboard dialihkan ke dashboard admin.
   // Pengecualian: tombol "Tampilan Warga" di panel admin membuka
   // /dashboard?tampilan=warga — admin sengaja ingin melihat dashboard warga.
