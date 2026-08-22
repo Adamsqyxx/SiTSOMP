@@ -8,8 +8,10 @@ import BackButton from "@/components/back-button";
 import { getServiceBySlug, type SuratService } from "@/lib/surat-config";
 import { uploadLampiran, type LampiranUpload } from "@/lib/lampiran";
 
-interface ProfileUser {
-  id?: string;
+interface MeResponse {
+  user?: {
+    id?: string;
+  } | null;
 }
 
 export default function PengajuanPage() {
@@ -58,8 +60,8 @@ export default function PengajuanPage() {
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: ProfileUser | null) => {
-        if (d?.id) setUserId(d.id);
+      .then((d: MeResponse | null) => {
+        if (d?.user?.id) setUserId(d.user.id);
       })
       .catch(() => {});
   }, []);
