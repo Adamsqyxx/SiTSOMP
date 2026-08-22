@@ -143,7 +143,7 @@ export default function DashboardPage() {
       <AppHeader />
 
       {/* Content */}
-      <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 md:px-margin-desktop bg-background px-safe">
         {isStaff ? (
           /* Staf kelurahan: dashboard terpadu — antrean persetujuan
              layanan surat + data penduduk dalam satu halaman. */
@@ -175,8 +175,8 @@ export default function DashboardPage() {
             {/* Left column */}
             <div className="lg:col-span-2 flex flex-col gap-5 md:gap-6">
               {/* Active application status */}
-              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 sm:p-6 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full pointer-events-none" />
+              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 sm:p-6 relative">
+                <div className="absolute top-0 right-0 w-40 h-40 sm:w-64 sm:h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full pointer-events-none" />
                 {muatRiwayat ? (
                   <p className="font-body-md text-body-md text-on-surface-variant">Memuat status pengajuan...</p>
                 ) : !aktif ? (

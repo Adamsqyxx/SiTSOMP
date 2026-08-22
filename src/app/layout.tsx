@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,14 @@ export const metadata: Metadata = {
   },
   description:
     "Sistem Informasi Kelurahan Tiro Sompe: layanan surat online, data kependudukan, peta wilayah, dan pengaduan masyarakat.",
+};
+
+// Viewport mobile: viewport-fit=cover mengaktifkan env(safe-area-inset-*)
+// di iPhone notch; maximum-scale mencegah zoom acak saat input difokus (iOS).
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

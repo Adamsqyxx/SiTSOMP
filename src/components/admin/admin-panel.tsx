@@ -492,11 +492,13 @@ export default function AdminPanel() {
                               </h4>
                               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                                 {(m.form_data.lampiran as unknown[])
-                                  .map((item, i) => {
-                                    const l = item as { label?: string; url?: string };
-                                    if (!l || typeof l.url !== "string") return null;
-                                    const isPdf = l.url.toLowerCase().endsWith(".pdf");
-                                    return (
+                                    .filter((item): item is { label?: string; url: string } => {
+                                      const l = item as { label?: string; url?: string } | null;
+                                      return !!l && typeof l.url === "string";
+                                    })
+                                    .map((l, i) => {
+                                      const isPdf = l.url.toLowerCase().endsWith(".pdf");
+                                      return (
                                       <a
                                         key={`${l.url}-${i}`}
                                         href={l.url}
@@ -515,7 +517,7 @@ export default function AdminPanel() {
                                             <img
                                               src={l.url}
                                               alt={l.label ?? `Lampiran ${i + 1}`}
-                                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform"
                                               loading="lazy"
                                             />
                                           )}
@@ -524,8 +526,8 @@ export default function AdminPanel() {
                                           {l.label ?? `Lampiran ${i + 1}`}
                                         </p>
                                       </a>
-                                    );
-                                  })}
+                                      );
+                                    })}
                               </div>
                             </div>
                           )}
