@@ -491,7 +491,7 @@ export default function AdminPage() {
                               <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
                                 {m.form_data &&
                                   Object.entries(m.form_data)
-                                    .filter(([k]) => !k.startsWith("_"))
+                                    .filter(([k]) => !k.startsWith("_") && k !== "lampiran")
                                     .map(([k, v]) => (
                                       <div key={k} className="flex gap-2 text-body-sm font-body-sm">
                                         <dt className="text-on-surface-variant capitalize min-w-[120px]">
@@ -507,6 +507,53 @@ export default function AdminPage() {
                                 )}
                               </dl>
                             </div>
+
+                            {/* Lampiran (scan/foto persyaratan) */}
+                            {Array.isArray(m.form_data?.lampiran) &&
+                              (m.form_data.lampiran as unknown[]).length > 0 && (
+                              <div>
+                                <h4 className="font-label-md text-label-md text-on-surface mb-2">
+                                  Lampiran Persyaratan
+                                </h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                                  {(m.form_data.lampiran as unknown[])
+                                    .map((item, i) => {
+                                      const l = item as { label?: string; url?: string };
+                                      if (!l || typeof l.url !== "string") return null;
+                                      const isPdf = l.url.toLowerCase().endsWith(".pdf");
+                                      return (
+                                        <a
+                                          key={`${l.url}-${i}`}
+                                          href={l.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="group block bg-surface-container-low border border-outline-variant rounded-lg overflow-hidden hover:border-primary transition-colors"
+                                        >
+                                          <div className="aspect-square w-full bg-surface flex items-center justify-center overflow-hidden">
+                                            {isPdf ? (
+                                              <span className="flex flex-col items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
+                                                <FileText aria-hidden="true" className="w-8 h-8" />
+                                                PDF
+                                              </span>
+                                            ) : (
+                                              // eslint-disable-next-line @next/next/no-img-element
+                                              <img
+                                                src={l.url}
+                                                alt={l.label ?? `Lampiran ${i + 1}`}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                                loading="lazy"
+                                              />
+                                            )}
+                                          </div>
+                                          <p className="px-2 py-1.5 font-label-sm text-label-sm text-on-surface truncate">
+                                            {l.label ?? `Lampiran ${i + 1}`}
+                                          </p>
+                                        </a>
+                                      );
+                                    })}
+                                </div>
+                              </div>
+                            )}
 
                             {m.catatan_petugas && (
                               <p className="font-body-sm text-body-sm text-on-surface-variant bg-surface-muted rounded-lg p-3">
