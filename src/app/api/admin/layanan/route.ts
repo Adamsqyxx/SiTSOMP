@@ -15,7 +15,9 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 // GET /api/admin/layanan — daftar permohonan surat untuk antrean admin.
-// Query: ?status=menunggu_verifikasi|dalam_proses|disetujui|ditolak|selesai
+// Query: ?status=menunggu_verifikasi|dalam_proses|perlu_revisi|disetujui|ditolak|selesai
+// Catatan: status "selesai" = permohonan yang sudah difinalisasi (selesai_at
+// terisi); status dasarnya tetap menyimpan keputusan (disetujui/ditolak/...).
 export async function GET(req: Request) {
   const session = await getAdminSession();
   if (!session) {
@@ -24,10 +26,12 @@ export async function GET(req: Request) {
 
   try {
     const statusParam = new URL(req.url).searchParams.get("status");
-    const where =
-      statusParam && statusParam in STATUS_LABEL
-        ? { status: statusParam as never }
-        : undefined;
+    let where: Record<string, unknown> | undefined;
+    if (statusParam === "selesai") {
+      where = { selesai_at: { not: null } };
+    } else if (statusParam && statusParam in STATUS_LABEL) {
+      where = { status: statusParam as never };
+    }
 
     const rows = await prisma.serviceRequest.findMany({
       where,
@@ -62,10 +66,13 @@ export async function GET(req: Request) {
       form_data: safeParse(r.form_data),
       catatan_petugas: r.catatan_petugas,
       status: r.status,
-      status_label: STATUS_LABEL[r.status] ?? r.status,
+      status_label:
+        r.selesai_at && STATUS_LABEL[r.status]
+          ? `${STATUS_LABEL[r.status]} (Selesai)`
+          : (STATUS_LABEL[r.status] ?? r.status),
+      selesai_at: r.selesai_at,
       diajukan_at: r.diajukan_at,
       diproses_at: r.diproses_at,
-      selesai_at: r.selesai_at,
     }));
 
     return NextResponse.json({
@@ -152,21 +159,38 @@ export async function PATCH(req: Request) {
       );
     }
 
+    // Permohonan yang sudah difinalisasi (selesai_at terisi) terkunci —
+    // keputusan tidak dapat diubah lagi.
+    if (existing.selesai_at) {
+      return NextResponse.json(
+        {
+          error:
+            "Permohonan sudah selesai dan keputusannya tidak dapat diubah lagi.",
+        },
+        { status: 409 }
+      );
+    }
+
     const now = new Date();
     const data: {
-      status: never;
+      status?: never;
       petugas_id: string;
       catatan_petugas?: string | null;
       diproses_at?: Date;
       selesai_at?: Date;
     } = {
-      status: statusBaru as never,
       petugas_id: session.user.id,
     };
     if (catatan) data.catatan_petugas = catatan;
 
-    if (aksi !== "revisi") data.diproses_at = existing.diproses_at ?? now;
-    if (aksi === "selesai") data.selesai_at = now;
+    // Aksi "selesai" = stempel finalisasi saja; status dasar (keputusan)
+    // tetap disimpan agar tidak tertimpa.
+    if (aksi === "selesai") {
+      data.selesai_at = now;
+    } else {
+      data.status = STATUS_BY_AKSI[aksi] as never;
+      if (aksi !== "revisi") data.diproses_at = existing.diproses_at ?? now;
+    }
 
     const updated = await prisma.serviceRequest.update({
       where: { id },

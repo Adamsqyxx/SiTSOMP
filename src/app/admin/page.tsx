@@ -84,6 +84,7 @@ interface Permohonan {
   catatan_petugas: string | null;
   status: string;
   status_label: string;
+  selesai_at?: string | null;
   diajukan_at: string;
 }
 
@@ -561,8 +562,16 @@ export default function AdminPage() {
                               </p>
                             )}
 
-                            {/* Aksi */}
-                            <div className="flex flex-col gap-3">
+                            {/* Aksi — terkunci setelah permohonan difinalisasi */}
+                            {m.selesai_at ? (
+                              <p className="font-body-sm text-body-sm text-on-surface-variant bg-surface-muted rounded-lg p-3 flex items-center gap-2">
+                                <CheckCircle2 aria-hidden="true" className="w-4 h-4 shrink-0" />
+                                Permohonan sudah selesai pada{" "}
+                                {fmtTanggal(m.selesai_at)} — keputusan terkunci
+                                dan tidak dapat diubah lagi.
+                              </p>
+                            ) : (
+                              <div className="flex flex-col gap-3">
                               <textarea
                                 value={catatan}
                                 onChange={(e) => setCatatan(e.target.value)}
@@ -613,7 +622,8 @@ export default function AdminPage() {
                                   Tandai Selesai
                                 </button>
                               </div>
-                            </div>
+                              </div>
+                            )}
                           </div>
                         )}
                       </article>
