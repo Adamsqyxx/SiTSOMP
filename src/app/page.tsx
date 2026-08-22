@@ -1,10 +1,15 @@
-"use client";
-
 import Link from "next/link";
 import { FileText, Map, Megaphone, Users } from "lucide-react";
 import AppHeader from "@/components/app-header";
+import { getInformasiPublik, JENIS_INFO_LABEL } from "@/lib/informasi-publik";
 
-export default function BerandaPage() {
+export const dynamic = "force-dynamic";
+
+export default async function BerandaPage() {
+  // Satu pengumuman/berita terbaru dari admin untuk strip di bawah kartu layanan.
+  const { items } = await getInformasiPublik(1);
+  const terbaru = items[0] ?? null;
+
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />
@@ -108,7 +113,7 @@ export default function BerandaPage() {
               </div>
             </Link>
 
-            {/* Pengumuman */}
+            {/* Pengumuman terbaru dari admin */}
             <Link
               href="/pengumuman"
               className="bg-surface-muted rounded-xl p-5 md:p-6 border border-border-subtle hover:border-primary hover:shadow-md transition-all group col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-4 flex items-start md:items-center gap-4"
@@ -117,12 +122,26 @@ export default function BerandaPage() {
                 <Megaphone aria-hidden="true" className="w-6 h-6" />
               </div>
               <div className="min-w-0">
-                <h4 className="font-label-md text-label-md font-semibold text-on-surface break-words">
-                  Pengumuman Terbaru: Jadwal Posyandu Balita Bulan Ini
-                </h4>
-                <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
-                  Pelaksanaan Posyandu akan diadakan pada tanggal 15 di Balai Warga RW 02.
-                </p>
+                {terbaru ? (
+                  <>
+                    <h4 className="font-label-md text-label-md font-semibold text-on-surface break-words">
+                      {JENIS_INFO_LABEL[terbaru.jenis as keyof typeof JENIS_INFO_LABEL] ?? "INFO"}{" "}
+                      Terbaru: {terbaru.title}
+                    </h4>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">
+                      {terbaru.desc}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <h4 className="font-label-md text-label-md font-semibold text-on-surface break-words">
+                      Informasi &amp; Pengumuman
+                    </h4>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                      Lihat informasi resmi dari Kelurahan Tiro Sompe.
+                    </p>
+                  </>
+                )}
               </div>
             </Link>
           </div>
