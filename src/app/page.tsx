@@ -1,120 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import {
-  Bell,
-  FileText,
-  Map,
-  Megaphone,
-  Menu,
-  Users,
-  X,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import AuthButtons from "@/components/auth-buttons";
+import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 
-const DESKTOP_NAV = [
-  { label: "Beranda", href: "/", active: true },
-  { label: "Layanan", href: "/layanan/surat", active: false },
-  { label: "Peta", href: "/peta", active: false },
-  { label: "Profil", href: "/profil", active: false },
-] as const;
-
 export default function BerandaPage() {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
-      {/* TopAppBar */}
-      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant transition-colors duration-200">
-        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50 max-w-max-width mx-auto">
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              aria-label="Menu"
-              onClick={() => setDrawerOpen(true)}
-              className="md:hidden text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-            >
-              <Menu aria-hidden="true" className="w-5 h-5" />
-            </button>
-            <BackButton
-              fallbackHref="/"
-              className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-            />
-            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
-              SiTSOMP
-            </Link>
-          </div>
+      <AppHeader />
 
-          <nav className="hidden md:flex gap-6 items-center">
-            {DESKTOP_NAV.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  "font-label-md text-label-md transition-colors",
-                  item.active
-                    ? "text-primary font-semibold border-b-2 border-primary pb-1"
-                    : "text-on-surface-variant hover:text-primary"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2 md:gap-3">
-            <AuthButtons className="hidden md:flex" />
-            <Link
-              href="/login"
-              aria-label="Notifikasi"
-              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-              title="Masuk untuk melihat notifikasi"
-            >
-              <Bell aria-hidden="true" className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Mobile drawer */}
-        {drawerOpen && (
-          <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-            <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-            <nav className="absolute left-0 top-0 h-full w-[280px] bg-surface flex flex-col p-4 shadow-xl">
-              <button
-                type="button"
-                aria-label="Tutup menu"
-                onClick={() => setDrawerOpen(false)}
-                className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low z-10"
-              >
-                <X aria-hidden="true" className="w-5 h-5" />
-              </button>
-              {DESKTOP_NAV.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setDrawerOpen(false)}
-                  className={cn(
-                    "px-4 py-3 rounded-full font-label-md text-label-md transition-colors",
-                    item.active
-                      ? "bg-primary-container text-on-primary-container"
-                      : "text-on-surface-variant hover:bg-surface-container-high"
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-              <div className="mt-auto pt-4 border-t border-outline-variant px-2">
-                <AuthButtons stacked />
-              </div>
-            </nav>
-          </div>
-        )}
-      </header>
-
-      <main className="flex-grow pt-16 md:pt-24 pb-20 md:pb-8 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-20 md:pb-8 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
         {/* Hero Section */}
         <section className="relative rounded-2xl overflow-hidden mb-12 bg-surface-container-high h-[400px] md:h-[500px] flex items-end">
           <div

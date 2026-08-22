@@ -10,19 +10,9 @@ import {
   Mail,
   Map,
   ShieldCheck,
-  User,
   UserRound,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import AuthButtons from "@/components/auth-buttons";
-import BackButton from "@/components/back-button";
-
-const DESKTOP_NAV = [
-  { label: "Beranda", href: "/", active: false },
-  { label: "Layanan", href: "/layanan/surat", active: false },
-  { label: "Peta", href: "/peta", active: false },
-  { label: "Profil", href: "/profil", active: true },
-] as const;
+import AppHeader from "@/components/app-header";
 
 interface ProfileUser {
   id?: string;
