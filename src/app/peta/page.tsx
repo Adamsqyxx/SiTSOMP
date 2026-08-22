@@ -273,8 +273,9 @@ export default function PetaPage() {
   const [focused, setFocused] = useState<Feature | null>(null);
   const [allFeatures, setAllFeatures] = useState<Feature[]>([]);
   const [query, setQuery] = useState("");
-  const [searchOpen, setSearchOpen] = useState(false);
   const [categoryKey, setCategoryKey] = useState<string>("all");
+  // Bottom-sheet filter mobile: true = expanded, false = peek (handle saja).
+  const [sheetExpanded, setSheetExpanded] = useState(false);
 
   // Set pilihan dari query string kalau ada (?kategori=kesehatan).
   const [loaded, setLoaded] = useState(false);
@@ -312,7 +313,7 @@ export default function PetaPage() {
   }, [allFeatures, query, categoryKey]);
 
   return (
-    <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen">
+    <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-[100dvh]">
       <AppHeader />
 
       <div className="flex flex-1 pt-16 lg:pt-0 lg:pl-16 h-full w-full">
@@ -337,96 +338,101 @@ export default function PetaPage() {
 
           {/* Map display area */}
           <section className="flex-1 flex flex-col relative bg-surface-dim overflow-hidden">
-            {/* Filter kategori — mobile (selalu terlihat, sejajar dengan panel desktop) */}
-            <div className="md:hidden flex items-center gap-2 px-3 py-2 bg-surface border-b border-outline-variant overflow-x-auto z-[550]">
+            {/* Filter kategori — mobile: bottom-sheet slider dengan drag handle.
+                Bisa ditarik antara posisi peek (hanya handle + chip aktif)
+                dan expanded (pencarian + daftar fasilitas). */}
+            <div
+              className={cn(
+                "md:hidden absolute bottom-0 left-0 right-0 z-[550] bg-surface rounded-t-2xl border-t border-outline-variant shadow-[0_-4px_16px_rgba(0,0,0,0.12)] transition-transform duration-300 ease-out",
+                sheetExpanded ? "translate-y-0" : "translate-y-[calc(100%-64px)]"
+              )}
+              style={{ maxHeight: "72vh" }}
+            >
+              {/* Drag handle — tap untuk buka/tutup, area ini juga swipe target */}
               <button
                 type="button"
-                aria-label="Cari lokasi"
-                onClick={() => setSearchOpen(true)}
-                className="shrink-0 text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full"
-                title="Cari lokasi"
+                aria-label={sheetExpanded ? "Tutup panel filter" : "Buka panel filter"}
+                aria-expanded={sheetExpanded}
+                onClick={() => setSheetExpanded((v) => !v)}
+                className="w-full flex flex-col items-center pt-2.5 pb-2 px-4 touch-manipulation select-none"
               >
-                <Search aria-hidden="true" className="w-5 h-5" />
+                <span className="w-10 h-1.5 rounded-full bg-outline-variant" />
+                <span className="mt-1 font-label-sm text-label-sm text-on-surface-variant">
+                  {sheetExpanded
+                    ? "Tarik ke bawah / ketuk untuk menutup"
+                    : `Filter & Pencarian — ${CATEGORIES.find((c) => c.key === categoryKey)?.label ?? ""}`}
+                </span>
               </button>
-              {CATEGORIES.map((cat) => (
-                <button
-                  key={cat.key}
-                  type="button"
-                  onClick={() => setCategoryKey(cat.key)}
-                  className={cn(
-                    "shrink-0 px-3 py-1.5 rounded-full font-label-sm text-label-sm transition-colors",
-                    categoryKey === cat.key
-                      ? "bg-primary text-on-primary"
-                      : "bg-surface-container-low text-on-surface-variant border border-outline-variant"
-                  )}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
 
-            <div className="flex-1 relative">
-            {/* Interaktif Leaflet map */}
-            <LeafletMap
-              onSelect={setSelected}
-              focusFeature={focused}
-              filterCategory={categoryKey}
-            />
-
-            {/* Mobile search overlay (muncul saat tombol Cari ditekan) */}
-            {searchOpen && (
-              <div className="absolute top-4 left-4 right-4 z-[600] md:hidden bg-surface rounded-xl border border-outline-variant shadow-lg p-4 max-h-[70vh] overflow-y-auto">
-                <div className="flex items-center gap-2 mb-3">
-                  <Search aria-hidden="true" className="w-5 h-5 text-on-surface-variant" />
+              {/* Konten sheet: scroll sendiri saat expanded */}
+              <div className="px-4 pb-viewport overflow-y-auto overscroll-contain max-h-[calc(72vh-64px)]">
+                {/* Search bar */}
+                <div className="relative mb-3">
+                  <Search
+                    aria-hidden="true"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant w-4 h-4"
+                  />
                   <input
-                    className="w-full bg-transparent outline-none font-body-md text-body-md text-on-surface placeholder:text-outline"
+                    className="w-full pl-9 pr-8 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-body-sm text-body-sm text-on-surface transition-shadow"
                     placeholder="Cari fasilitas, RT/RW, jalan..."
+                    type="text"
+                    inputMode="search"
+                    enterKeyHint="search"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Escape") setSearchOpen(false);
-                    }}
-                    autoFocus
                   />
-                  <button
-                    type="button"
-                    aria-label="Tutup pencarian"
-                    onClick={() => {
-                      setSearchOpen(false);
-                      setQuery("");
-                    }}
-                    className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-1"
-                  >
-                    <X aria-hidden="true" className="w-4 h-4" />
-                  </button>
+                  {query && (
+                    <button
+                      type="button"
+                      aria-label="Hapus pencarian"
+                      onClick={() => setQuery("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-on-surface-variant"
+                    >
+                      <X aria-hidden="true" className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
-                <div className="flex gap-2 flex-wrap mb-3">
+
+                {/* Kategori: grid 2 kolom seperti panel desktop */}
+                <div className="grid grid-cols-2 gap-2 mb-2">
                   {CATEGORIES.map((cat) => (
                     <button
                       key={cat.key}
                       type="button"
                       onClick={() => setCategoryKey(cat.key)}
                       className={cn(
-                        "px-3 py-1 rounded-full font-label-sm text-label-sm transition-colors",
+                        "flex items-center justify-center py-2.5 px-2 rounded-xl transition-colors",
                         categoryKey === cat.key
-                          ? "bg-primary text-on-primary"
-                          : "bg-surface-container-low text-on-surface-variant border border-outline-variant"
+                          ? "bg-primary text-on-primary border border-primary"
+                          : "bg-surface-container-low border border-outline-variant"
                       )}
                     >
-                      {cat.label}
+                      <span
+                        className={cn(
+                          "font-label-md text-label-md",
+                          categoryKey === cat.key ? "text-on-primary" : "text-on-surface"
+                        )}
+                      >
+                        {cat.label}
+                      </span>
                     </button>
                   ))}
                 </div>
+                <p className="font-label-sm text-label-sm text-outline mb-2">
+                  {filtered.length} fasilitas ditampilkan
+                </p>
+
+                {/* Daftar hasil */}
                 {query.trim() === "" && categoryKey === "all" ? (
-                  <p className="font-body-sm text-body-sm text-on-surface-variant px-1 py-2">
-                    Ketik nama atau pilih kategori untuk memfilter fasilitas.
+                  <p className="font-body-sm text-body-sm text-on-surface-variant px-1 py-3">
+                    Ketik nama atau pilih kategori untuk memfilter fasilitas di peta.
                   </p>
                 ) : filtered.length === 0 ? (
-                  <p className="font-body-sm text-body-sm text-on-surface-variant px-1 py-2">
+                  <p className="font-body-sm text-body-sm text-on-surface-variant px-1 py-3">
                     Tidak ada hasil.
                   </p>
                 ) : (
-                  <ul className="space-y-1">
+                  <ul className="space-y-1 pb-2">
                     {filtered.map((f) => (
                       <li key={f.id}>
                         <button
@@ -434,10 +440,10 @@ export default function PetaPage() {
                           onClick={() => {
                             setSelected(f);
                             setFocused(f);
-                            setSearchOpen(false);
+                            setSheetExpanded(false);
                             setQuery("");
                           }}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-surface-container-high transition-colors flex items-center gap-2"
+                          className="w-full text-left px-3 py-2.5 rounded-lg active:bg-surface-container-high transition-colors flex items-center gap-2"
                         >
                           <MapPin aria-hidden="true" className="w-4 h-4 text-primary shrink-0" />
                           <span className="font-body-sm text-body-sm text-on-surface truncate">
@@ -452,11 +458,21 @@ export default function PetaPage() {
                   </ul>
                 )}
               </div>
-            )}
+            </div>
+
+            <div className="flex-1 relative">
+            {/* Interaktif Leaflet map */}
+            <LeafletMap
+              onSelect={setSelected}
+              focusFeature={focused}
+              filterCategory={categoryKey}
+            />
+
+            {/* Mobile search overlay lama digantikan bottom-sheet filter di atas. */}
 
             {/* Selected feature card (mobile overlay) */}
             {selected && (
-              <div className="absolute bottom-6 left-6 right-6 md:left-auto md:w-80 bg-surface/90 backdrop-blur-md border border-outline-variant/50 rounded-xl shadow-lg overflow-hidden">
+              <div className="absolute bottom-20 md:bottom-6 left-4 right-4 sm:left-6 sm:right-6 md:left-auto md:w-80 bg-surface/90 backdrop-blur-md border border-outline-variant/50 rounded-xl shadow-lg overflow-hidden pb-viewport">
                 <div className="p-4 border-b border-outline-variant/50 flex justify-between items-start">
                   <div>
                     <span className="inline-block px-2 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded mb-1">
