@@ -12,6 +12,11 @@ import {
 import { cn } from "@/lib/utils";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
+import dynamicImport from "next/dynamic";
+
+// Panel admin (antrean setujui + data penduduk) dimuat lazy —
+// hanya dipakai bila user login adalah staf kelurahan.
+const AdminPanel = dynamicImport(() => import("@/components/admin/admin-panel"));
 
 interface Riwayat {
   id: string;
@@ -28,6 +33,9 @@ interface UserInfo {
   nama_lengkap?: string | null;
   role?: string | null;
 }
+
+// Role yang dianggap staf kelurahan (sinkron src/lib/admin-auth.ts).
+const STAFF_ROLES = ["super_admin", "lurah", "sekretaris", "petugas"];
 
 // Urutan proses surat untuk timeline.
 function langkahTimeline(status: string) {
@@ -115,6 +123,9 @@ export default function DashboardPage() {
     [riwayat]
   );
 
+  const isStaff =
+    !!user?.role && (STAFF_ROLES as string[]).includes(user.role);
+
   const fmtTanggal = (iso: string) => {
     try {
       return new Date(iso).toLocaleDateString("id-ID", {
@@ -133,6 +144,11 @@ export default function DashboardPage() {
 
       {/* Content */}
       <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
+        {isStaff ? (
+          /* Staf kelurahan: dashboard terpadu — antrean persetujuan
+             layanan surat + data penduduk dalam satu halaman. */
+          <AdminPanel />
+        ) : (
         <div className="max-w-max-width mx-auto flex flex-col gap-8">
           {/* Page header */}
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -392,6 +408,7 @@ export default function DashboardPage() {
             </div>
           </footer>
         </div>
+        )}
       </main>
     </div>
   );

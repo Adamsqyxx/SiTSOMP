@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   ClipboardList,
@@ -14,7 +13,6 @@ import {
   Search,
   Trash2,
   Upload,
-  User,
   Users,
   X,
   XCircle,
@@ -128,7 +126,6 @@ const KOSONG_FORM = {
 };
 
 export default function AdminPanel() {
-  const router = useRouter();
   const [tab, setTab] = useState<Tab>("layanan");
 
   // ── State layanan surat ──
@@ -947,6 +944,7 @@ export default function AdminPanel() {
           </div>
         </div>
       </div>
+      )}
     </>
   );
 }
