@@ -14,10 +14,28 @@ export async function POST(req: Request) {
     const kode = typeof body?.kode === "string" ? body.kode.trim().toLowerCase() : "";
     const jenis = typeof body?.jenis === "string" ? body.jenis.trim() : "";
     const data = body?.data;
+    const lampiran = body?.lampiran;
 
     if (!kode || !data || typeof data !== "object") {
       return NextResponse.json(
         { error: "Data pengajuan tidak lengkap." },
+        { status: 400 }
+      );
+    }
+
+    // Lampiran: array { label, url } dari upload client ke Supabase Storage.
+    const lampiranValid =
+      Array.isArray(lampiran) &&
+      lampiran.every(
+        (l: unknown) =>
+          l &&
+          typeof l === "object" &&
+          typeof (l as { label?: unknown }).label === "string" &&
+          typeof (l as { url?: unknown }).url === "string"
+      );
+    if (lampiran && !lampiranValid) {
+      return NextResponse.json(
+        { error: "Format lampiran tidak valid." },
         { status: 400 }
       );
     }
@@ -58,7 +76,11 @@ export async function POST(req: Request) {
         nomor_permohonan: nomorPermohonan,
         pemohon_id: session.user.id,
         jenis_surat_id: jenisSurat.id,
-        form_data: JSON.stringify({ ...formData, _nama_pemohon: namaPemohon }),
+        form_data: JSON.stringify({
+          ...formData,
+          _nama_pemohon: namaPemohon,
+          lampiran: lampiranValid ? (lampiran as unknown[]) : undefined,
+        }),
         status: "menunggu_verifikasi",
       },
     });

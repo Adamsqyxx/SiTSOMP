@@ -3,83 +3,20 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  ArrowRight,
-  FileWarning,
-  HandHeart,
-  MapPin,
-  Search,
-  Store,
-} from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppHeader from "@/components/app-header";
-
-const CATEGORIES = ["Semua", "Kependudukan", "Usaha", "Sosial"] as const;
-
-interface Service {
-  id: string;
-  name: string;
-  category: string;
-  desc: string;
-  requirements: string[];
-  icon: typeof HandHeart;
-  iconClass: string;
-  action: string;
-  actionClass: string;
-}
-
-const SERVICES: Service[] = [
-  {
-    id: "SKTM",
-    name: "Surat Keterangan Tidak Mampu (SKTM)",
-    category: "Sosial",
-    desc: "Diperlukan untuk keperluan keringanan biaya pendidikan, kesehatan, atau bantuan sosial lainnya.",
-    requirements: ["Pengantar RT/RW", "Fotokopi KK & KTP", "Foto kondisi rumah"],
-    icon: HandHeart,
-    iconClass: "bg-primary-fixed text-primary",
-    action: "Buat Pengajuan",
-    actionClass: "bg-primary text-on-primary hover:bg-on-primary-fixed-variant",
-  },
-  {
-    id: "SKU",
-    name: "Surat Keterangan Usaha (SKU)",
-    category: "Usaha",
-    desc: "Digunakan sebagai bukti kepemilikan usaha untuk keperluan pinjaman bank atau perizinan lanjutan.",
-    requirements: ["Pengantar RT/RW", "Fotokopi KTP", "Foto tempat usaha"],
-    icon: Store,
-    iconClass: "bg-secondary-fixed text-secondary",
-    action: "Buat Pengajuan",
-    actionClass: "bg-primary text-on-primary hover:bg-on-primary-fixed-variant",
-  },
-  {
-    id: "DOM",
-    name: "Surat Keterangan Domisili",
-    category: "Kependudukan",
-    desc: "Keterangan tempat tinggal sementara bagi warga yang belum memiliki KTP setempat.",
-    requirements: ["Pengantar RT/RW", "Fotokopi KTP asal", "Fotokopi KK asal"],
-    icon: MapPin,
-    // Konsisten dengan SKTM/SKU: ikon tonal + tombol solid primary.
-    iconClass: "bg-secondary-fixed text-secondary",
-    action: "Buat Pengajuan",
-    actionClass: "bg-primary text-on-primary hover:bg-on-primary-fixed-variant",
-  },
-  {
-    id: "SKM",
-    name: "Surat Keterangan Kematian",
-    category: "Kependudukan",
-    desc: "Dokumen pendukung untuk mengurus akta kematian di Dinas Kependudukan dan Catatan Sipil.",
-    requirements: ["Surat keterangan RS/Dokter", "KTP Asli Almarhum", "KK Asli Almarhum"],
-    icon: FileWarning,
-    iconClass: "bg-secondary-fixed text-secondary",
-    action: "Buat Pengajuan",
-    actionClass: "bg-primary text-on-primary hover:bg-on-primary-fixed-variant",
-  },
-];
+import {
+  SERVICES,
+  CATEGORIES,
+  type SuratCategory,
+  type SuratService,
+} from "@/lib/surat-config";
 
 export default function LayananSuratPage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<string>("Semua");
+  const [category, setCategory] = useState<SuratCategory>("Semua");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -94,10 +31,8 @@ export default function LayananSuratPage() {
     });
   }, [query, category]);
 
-  const handleAction = (s: Service) => {
-    // Alur pengajuan nyata tersedia nanti; sekarang arahkan ke halaman pengajuan
-    // dengan kode surat terpilih.
-    router.push(`/layanan/surat/${s.id.toLowerCase()}?jenis=${encodeURIComponent(s.name)}`);
+  const handleAction = (s: SuratService) => {
+    router.push(`/layanan/surat/${s.slug}?jenis=${encodeURIComponent(s.name)}`);
   };
 
   return (
@@ -111,8 +46,8 @@ export default function LayananSuratPage() {
               Layanan Surat Administrasi
             </h1>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-              Pilih jenis surat yang ingin Anda ajukan. Pastikan Anda telah melengkapi semua
-              persyaratan yang dibutuhkan sebelum memulai proses pengajuan.
+              Pilih jenis surat yang ingin Anda ajukan. Pastikan Anda telah menyiapkan
+              semua persyaratan (foto/scan dokumen) sebelum memulai proses pengajuan.
             </p>
           </div>
 
@@ -157,46 +92,50 @@ export default function LayananSuratPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((s) => (
-                <div
-                  key={s.id}
-                  className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 flex flex-col hover:border-primary transition-colors group"
-                >
+              {filtered.map((s) => {
+                const Icon = s.icon;
+                return (
                   <div
-                    className={cn(
-                      "w-12 h-12 rounded-lg flex items-center justify-center mb-4",
-                      s.iconClass
-                    )}
+                    key={s.id}
+                    className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 flex flex-col hover:border-primary transition-colors group"
                   >
-                    <s.icon aria-hidden="true" className="w-6 h-6" />
+                    <div
+                      className={
+                        "w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-primary-fixed text-primary"
+                      }
+                    >
+                      <Icon aria-hidden="true" className="w-6 h-6" />
+                    </div>
+                    <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">
+                      {s.name}
+                    </h3>
+                    <p className="font-body-sm text-body-sm text-on-surface-variant mb-6 flex-1">
+                      {s.desc}
+                    </p>
+                    <div className="bg-surface-container-low rounded-lg p-4 mb-6">
+                      <h4 className="font-label-sm text-label-sm text-on-surface mb-2">
+                        Persyaratan (lampirkan foto/scan):
+                      </h4>
+                      <ul className="font-body-sm text-body-sm text-on-surface-variant space-y-1 list-disc pl-4">
+                        {s.requirements.map((r) => (
+                          <li key={r.label}>{r.label}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleAction(s)}
+                      className={cn(
+                        "w-full py-3 rounded-lg font-label-md text-label-md transition-colors flex justify-center items-center gap-2 mt-auto",
+                        "bg-primary text-on-primary hover:bg-on-primary-fixed-variant"
+                      )}
+                    >
+                      Buat Pengajuan
+                      <ArrowRight aria-hidden="true" className="w-4 h-4" />
+                    </button>
                   </div>
-                  <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">
-                    {s.name}
-                  </h3>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant mb-6 flex-1">
-                    {s.desc}
-                  </p>
-                  <div className="bg-surface-container-low rounded-lg p-4 mb-6">
-                    <h4 className="font-label-sm text-label-sm text-on-surface mb-2">Persyaratan:</h4>
-                    <ul className="font-body-sm text-body-sm text-on-surface-variant space-y-1 list-disc pl-4">
-                      {s.requirements.map((r) => (
-                        <li key={r}>{r}</li>
-                      ))}
-                    </ul>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleAction(s)}
-                    className={cn(
-                      "w-full py-3 rounded-lg font-label-md text-label-md transition-colors flex justify-center items-center gap-2 mt-auto",
-                      s.actionClass
-                    )}
-                  >
-                    {s.action}
-                    <ArrowRight aria-hidden="true" className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
