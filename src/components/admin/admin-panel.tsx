@@ -537,7 +537,7 @@ export default function AdminPanel() {
                                             <img
                                               src={l.url}
                                               alt={l.label ?? `Lampiran ${i + 1}`}
-                                              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                              className="block w-full h-full object-cover group-hover:scale-105 transition-transform"
                                               loading="lazy"
                                             />
                                           )}
