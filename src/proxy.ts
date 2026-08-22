@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import NextAuth from "next-auth";
 import { authConfig } from "@/auth.config";
 
-// Proteksi route via NextAuth (v5). auth() di middleware membaca JWT session
+// Proteksi route via NextAuth (v5). auth() di proxy membaca JWT session
 // cookie — TANPA import Prisma (aman untuk Edge Runtime).
 const { auth } = NextAuth(authConfig);
 
@@ -11,7 +11,7 @@ const PROTECTED_PREFIXES = ["/dashboard", "/peta", "/layanan"];
 const ADMIN_PREFIX = "/admin";
 const ADMIN_ROLES = ["super_admin", "lurah", "sekretaris", "petugas"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const session = await auth();
   const { pathname } = request.nextUrl;
 
@@ -56,9 +56,8 @@ export async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Catatan (Next 16): konvensi "middleware" deprecated, migrasi ke "proxy"
-// via: npx @next/codemod@canary middleware-to-proxy .
 // Matcher: jalankan di semua route kecuali static assets & api auth nextauth.
+// (Next 16: konvensi "middleware" sudah di-rename jadi "proxy".)
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|api/auth/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",

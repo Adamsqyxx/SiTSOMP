@@ -1,7 +1,7 @@
 import type { NextAuthConfig } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
-// Konfigurasi NextAuth TANPA Prisma — aman untuk Edge Runtime (middleware).
+// Konfigurasi NextAuth TANPA Prisma — aman untuk Edge Runtime (proxy).
 // Provider credentials di sini tidak dipakai untuk authorize (hanya agar
 // NextAuth tahu bentuk login); authorize sebenarnya ada di auth.ts.
 export const authConfig = {
@@ -28,7 +28,7 @@ export const authConfig = {
     authorized() {
       return true;
     },
-    // Salin data user ke token saat login — dipakai juga oleh middleware
+    // Salin data user ke token saat login — dipakai juga oleh proxy
     // (Edge) agar session.user.role tersedia untuk proteksi route /admin.
     async jwt({ token, user }) {
       if (user) {

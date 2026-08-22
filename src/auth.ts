@@ -5,7 +5,7 @@ import { authConfig } from "@/auth.config";
 import Credentials from "next-auth/providers/credentials";
 
 // Konfigurasi NextAuth (Auth.js) v5 — Credentials Provider + JWT session.
-// authConfig (tanpa Prisma) dipakai middleware di Edge Runtime; di sini
+// authConfig (tanpa Prisma) dipakai proxy di Edge Runtime; di sini
 // ditambah authorize yang butuh DB (bcrypt + Prisma).
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
