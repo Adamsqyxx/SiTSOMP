@@ -37,9 +37,13 @@ export async function middleware(request: NextRequest) {
   }
 
   // Admin yang buka /dashboard dialihkan ke dashboard admin.
+  // Pengecualian: tombol "Tampilan Warga" di panel admin membuka
+  // /dashboard?tampilan=warga — admin sengaja ingin melihat dashboard warga.
   if (pathname === "/dashboard" && session?.user) {
     const role = (session.user as { role?: string }).role ?? "warga";
-    if (ADMIN_ROLES.includes(role)) {
+    const tampilanWarga =
+      request.nextUrl.searchParams.get("tampilan") === "warga";
+    if (ADMIN_ROLES.includes(role) && !tampilanWarga) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
   }

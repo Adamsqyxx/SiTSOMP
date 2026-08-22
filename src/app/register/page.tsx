@@ -16,6 +16,7 @@ import {
   User,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import BackButton from "@/components/back-button";
 
 // Form state untuk registrasi; koneksi ke Supabase Auth menunggu kredensial.
 const INITIAL_FORM = {
@@ -92,6 +93,7 @@ export default function RegisterPage() {
         />
         {/* Branding header */}
         <div className="relative z-10">
+          <BackButton fallbackHref="/" className="mb-6 -ml-1" />
           <div className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center shadow-sm">
               <Building2 aria-hidden="true" className="w-5 h-5 text-on-primary" />
@@ -125,6 +127,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-[480px]">
           {/* Mobile branding */}
           <div className="lg:hidden flex flex-col items-center mb-8 text-center">
+            <BackButton fallbackHref="/" className="self-start mb-2 -ml-1" />
             <div className="w-12 h-12 bg-primary-container rounded-full flex items-center justify-center mb-3">
               <Building2 aria-hidden="true" className="w-6 h-6 text-on-primary-container" />
             </div>

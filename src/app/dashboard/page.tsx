@@ -7,6 +7,7 @@ import {
   Download,
   Eye,
   FileText,
+  LayoutDashboard,
   Megaphone,
   User,
 } from "lucide-react";
@@ -163,6 +164,15 @@ export default function DashboardPage() {
           </nav>
 
           <div className="flex items-center gap-2 md:gap-3">
+            {user && (ADMIN_ROLES as readonly string[]).includes(user.role ?? "") && (
+              <Link
+                href="/admin"
+                className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
+              >
+                <LayoutDashboard aria-hidden="true" className="w-4 h-4" />
+                <span className="hidden sm:inline">Panel Admin</span>
+              </Link>
+            )}
             <AuthButtons className="hidden md:flex" />
             <Link
               href="/login"
@@ -182,6 +192,7 @@ export default function DashboardPage() {
           {/* Page header */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
+              <BackButton fallbackHref="/" className="mb-3 -ml-1" />
               <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard Warga</h1>
               <p className="font-body-md text-body-md text-on-surface-variant mt-2">
                 Pantau status pengajuan administrasi dan notifikasi terkini Anda.

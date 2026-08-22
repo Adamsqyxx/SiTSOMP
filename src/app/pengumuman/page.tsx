@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
 
 const DESKTOP_NAV = [
   { label: "Beranda", href: "/", active: false },
@@ -88,6 +89,7 @@ export default function PengumumanPage() {
 
       <main className="flex-grow pt-16 md:pt-24 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
         <div className="mb-8">
+          <BackButton fallbackHref="/" className="mb-3 -ml-1" />
           <span className="inline-block px-3 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded-full mb-3 flex items-center gap-1.5">
             <Megaphone aria-hidden="true" className="w-4 h-4" /> PENGUMUMAN
           </span>

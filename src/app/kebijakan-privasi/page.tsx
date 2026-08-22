@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
 
 export const metadata = {
   title: "Kebijakan Privasi",
@@ -56,6 +57,9 @@ export default function KebijakanPrivasiPage() {
 
       <main className="flex-grow pt-24 pb-16 px-margin-mobile md:px-margin-desktop max-w-3xl mx-auto w-full">
         <div className="flex items-center gap-3 mb-8">
+          <BackButton fallbackHref="/" className="-ml-1" />
+        </div>
+          <div className="flex items-center gap-3 mb-2">
           <div className="w-12 h-12 rounded-full bg-primary-container text-primary flex items-center justify-center">
             <ShieldCheck aria-hidden="true" className="w-6 h-6" />
           </div>

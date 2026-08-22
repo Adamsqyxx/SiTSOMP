@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import BackButton from "@/components/back-button";
 
 const DESKTOP_NAV = [
   { label: "Beranda", icon: Home, href: "/", active: false },
@@ -216,6 +217,11 @@ export default function PengajuanPage() {
           >
             <Menu aria-hidden="true" className="w-5 h-5" />
           </button>
+          <BackButton
+            fallbackHref="/layanan/surat"
+            label=""
+            className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+          />
           <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</Link>
         </div>
 
@@ -270,6 +276,7 @@ export default function PengajuanPage() {
 
       <main className="flex-1 pt-16 w-full max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8">
         <div className="mb-8">
+          <BackButton fallbackHref="/layanan/surat" className="mb-3 -ml-1" />
           <span className="inline-block px-3 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded-full mb-3 uppercase tracking-wide">
             {(key || "surat").toUpperCase()}
           </span>

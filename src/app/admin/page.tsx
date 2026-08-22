@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
-  ChevronLeft,
   ClipboardList,
   Clock,
   FileSpreadsheet,
@@ -22,6 +21,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import BackButton from "@/components/back-button";
 
 // ── Konstanta tampilan ────────────────────────────────────────────────
 const FORMAT_DITERIMA = [".xlsx", ".xlsm", ".csv", ".ods", ".xlsb"];
@@ -339,13 +339,10 @@ export default function AdminPage() {
       <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant">
         <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto">
           <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              aria-label="Kembali ke beranda"
+            <BackButton
               className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-            >
-              <ChevronLeft aria-hidden="true" className="w-5 h-5" />
-            </Link>
+              label=""
+            />
             <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
               SiTSOMP
             </Link>
@@ -355,7 +352,7 @@ export default function AdminPage() {
           </div>
           <button
             type="button"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/dashboard?tampilan=warga")}
             className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
           >
             <User aria-hidden="true" className="w-4 h-4" />

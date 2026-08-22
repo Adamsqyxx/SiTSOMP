@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
 
 // Daftar kategori fasilitas (dipetakan ke nilai enum JenisLokasi).
 const CATEGORIES = [
@@ -326,6 +327,11 @@ export default function PetaPage() {
       <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant transition-colors duration-200">
         <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50 max-w-max-width mx-auto">
           <div className="flex items-center gap-4">
+            <BackButton
+              fallbackHref="/"
+              label=""
+              className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+            />
             <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
               SiTSOMP
             </Link>

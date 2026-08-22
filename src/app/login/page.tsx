@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Info, Lock, LogIn, ShieldCheck, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import BackButton from "@/components/back-button";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -59,6 +60,7 @@ export default function LoginPage() {
 
       {/* Main login card */}
       <main className="relative z-10 w-full max-w-md p-8 md:p-10 bg-surface-container-lowest rounded-xl shadow-lg border border-border-subtle flex flex-col mx-margin-mobile">
+        <BackButton fallbackHref="/" className="self-start mb-2 -ml-1" />
         {/* Brand header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center mx-auto mb-4">

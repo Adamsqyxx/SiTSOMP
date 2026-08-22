@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
 
 const DESKTOP_NAV = [
   { label: "Beranda", icon: Home, href: "/", active: false },
@@ -177,6 +178,11 @@ export default function LayananSuratPage() {
           >
             <Menu aria-hidden="true" className="w-5 h-5" />
           </button>
+          <BackButton
+            fallbackHref="/"
+            label=""
+            className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+          />
           <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</Link>
         </div>
 

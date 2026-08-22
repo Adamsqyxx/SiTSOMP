@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
 
 const DESKTOP_NAV = [
   { label: "Beranda", href: "/", active: false },
@@ -102,7 +103,8 @@ export default function DataPendudukPage() {
       <main className="flex-grow pt-16 md:pt-24 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
         <div className="max-w-max-width mx-auto flex flex-col gap-6">
           <div>
-                        <h1 className="font-headline-lg text-headline-lg text-on-surface">Data Penduduk</h1>
+              <BackButton fallbackHref="/" className="mb-3 -ml-1" />
+              <h1 className="font-headline-lg text-headline-lg text-on-surface">Data Penduduk</h1>
             <p className="font-body-md text-body-md text-on-surface-variant mt-2">
               Cari informasi kependudukan di wilayah Kelurahan Tiro Sompe.
             </p>
