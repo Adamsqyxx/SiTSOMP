@@ -331,12 +331,12 @@ export default function AdminPanel() {
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-max-width flex-col gap-6">
+      <div className="mx-auto flex w-full max-w-max-width flex-col gap-5 md:gap-6">
         <div>
-          <h1 className="font-headline-lg text-headline-lg text-on-surface">
+          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
             Dashboard Admin
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant mt-1">
+          <p className="font-body-sm text-body-sm md:font-body-md md:text-body-md text-on-surface-variant mt-1">
             Kelola persetujuan layanan surat dan data penduduk Kelurahan Tiro Sompe.
           </p>
         </div>
@@ -347,7 +347,7 @@ export default function AdminPanel() {
             type="button"
             onClick={() => setTab("layanan")}
             className={cn(
-              "flex items-center gap-2 px-4 py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
+              "flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
               tab === "layanan"
                 ? "border-primary text-primary font-semibold"
                 : "border-transparent text-on-surface-variant hover:text-on-surface"
@@ -365,7 +365,7 @@ export default function AdminPanel() {
             type="button"
             onClick={() => setTab("penduduk")}
             className={cn(
-              "flex items-center gap-2 px-4 py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
+              "flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
               tab === "penduduk"
                 ? "border-primary text-primary font-semibold"
                 : "border-transparent text-on-surface-variant hover:text-on-surface"
@@ -380,7 +380,7 @@ export default function AdminPanel() {
         {tab === "layanan" && (
           <section className="flex flex-col gap-4">
             {/* Filter status */}
-            <div className="flex gap-2 overflow-x-auto pb-1">
+            <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
               {STATUS_FILTERS.map((f) => (
                 <button
                   key={f.key}
@@ -437,21 +437,21 @@ export default function AdminPanel() {
                       >
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-label-lg text-label-lg text-on-surface font-semibold">
+                            <h3 className="font-label-md text-label-md sm:font-label-lg sm:text-label-lg text-on-surface font-semibold">
                               {m.jenis_surat}
                             </h3>
                             <span className={cn("px-2 py-0.5 rounded-full font-label-sm text-label-sm", badgeStatus(m.status))}>
                               {m.status_label}
                             </span>
                           </div>
-                          <p className="font-code-sm text-code-sm text-outline mt-1">{m.nomor_permohonan}</p>
-                          <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                          <p className="font-code-sm text-code-sm text-outline mt-1 break-all">{m.nomor_permohonan}</p>
+                          <p className="font-body-sm text-body-sm text-on-surface-variant mt-1 break-words">
                             Pemohon: <span className="text-on-surface">{m.nama_pemohon}</span>
                             {m.nik_pemohon ? ` · NIK ${m.nik_pemohon}` : ""}
                           </p>
                         </div>
                         <div className="text-right shrink-0">
-                          <p className="font-label-sm text-label-sm text-outline flex items-center gap-1 justify-end">
+                          <p className="font-label-sm text-label-sm text-outline flex items-center gap-1 justify-end whitespace-nowrap">
                             <Clock aria-hidden="true" className="w-3.5 h-3.5" />
                             {fmtTanggal(m.diajukan_at)}
                           </p>
@@ -468,11 +468,11 @@ export default function AdminPanel() {
                                 Object.entries(m.form_data)
                                   .filter(([k]) => !k.startsWith("_") && k !== "lampiran")
                                   .map(([k, v]) => (
-                                    <div key={k} className="flex gap-2 text-body-sm font-body-sm">
-                                      <dt className="text-on-surface-variant capitalize min-w-[120px]">
+                                    <div key={k} className="flex flex-col sm:flex-row sm:gap-2 text-body-sm font-body-sm">
+                                      <dt className="text-on-surface-variant capitalize sm:min-w-[120px] shrink-0">
                                         {k.replace(/_/g, " ")}:
                                       </dt>
-                                      <dd className="text-on-surface break-words">{String(v ?? "-")}</dd>
+                                      <dd className="text-on-surface break-words min-w-0">{String(v ?? "-")}</dd>
                                     </div>
                                   ))}
                               {!m.form_data && (
@@ -553,12 +553,12 @@ export default function AdminPanel() {
                               rows={2}
                               className="w-full px-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg text-on-surface font-body-sm text-body-sm placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-y"
                             />
-                            <div className="flex flex-wrap gap-2">
+                            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
                               <button
                                 type="button"
                                 disabled={aksiBerjalan}
                                 onClick={() => jalankanAksi(m.id, "setujui")}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-success text-white font-label-md text-label-md disabled:opacity-60"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg bg-success text-white font-label-md text-label-md disabled:opacity-60"
                               >
                                 <CheckCircle2 aria-hidden="true" className="w-4 h-4" /> Setujui
                               </button>
@@ -566,7 +566,7 @@ export default function AdminPanel() {
                                 type="button"
                                 disabled={aksiBerjalan}
                                 onClick={() => jalankanAksi(m.id, "tolak")}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-error text-on-error font-label-md text-label-md disabled:opacity-60"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg bg-error text-on-error font-label-md text-label-md disabled:opacity-60"
                               >
                                 <XCircle aria-hidden="true" className="w-4 h-4" /> Tolak
                               </button>
@@ -574,7 +574,7 @@ export default function AdminPanel() {
                                 type="button"
                                 disabled={aksiBerjalan}
                                 onClick={() => jalankanAksi(m.id, "proses")}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container-high disabled:opacity-60"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container-high disabled:opacity-60"
                               >
                                 <Clock aria-hidden="true" className="w-4 h-4" /> Tandai Diproses
                               </button>
@@ -583,7 +583,7 @@ export default function AdminPanel() {
                                 disabled={aksiBerjalan || !catatan.trim()}
                                 title={!catatan.trim() ? "Isi catatan untuk meminta revisi" : ""}
                                 onClick={() => jalankanAksi(m.id, "revisi")}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-warning-container text-on-warning-container font-label-md text-label-md disabled:opacity-50"
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg bg-warning-container text-on-warning-container font-label-md text-label-md disabled:opacity-50"
                               >
                                 Minta Revisi
                               </button>
@@ -591,7 +591,7 @@ export default function AdminPanel() {
                                 type="button"
                                 disabled={aksiBerjalan}
                                 onClick={() => jalankanAksi(m.id, "selesai")}
-                                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
+                                className="col-span-2 sm:col-span-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
                               >
                                 Tandai Selesai
                               </button>
@@ -612,7 +612,7 @@ export default function AdminPanel() {
         {tab === "penduduk" && (
           <section className="flex flex-col gap-4">
             {/* Panel import file */}
-            <div className="bg-surface-container-lowest border border-border-subtle rounded-xl p-5 flex flex-col gap-3">
+            <div className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 md:p-5 flex flex-col gap-3">
               <h2 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
                 <FileSpreadsheet aria-hidden="true" className="w-5 h-5 text-primary" />
                 Import dari File Spreadsheet
@@ -642,26 +642,28 @@ export default function AdminPanel() {
               </div>
 
               {file && (
-                <div className="flex flex-wrap items-center gap-3 bg-surface-muted rounded-lg p-3">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 bg-surface-muted rounded-lg p-3">
                   <FileSpreadsheet aria-hidden="true" className="w-5 h-5 text-primary shrink-0" />
-                  <span className="font-body-sm text-body-sm text-on-surface break-all">
+                  <span className="font-body-sm text-body-sm text-on-surface break-all min-w-0 flex-1 basis-full sm:basis-auto">
                     {file.name} ({(file.size / 1024).toFixed(1)} KB)
                   </span>
-                  <button
-                    type="button"
-                    onClick={kirimImport}
-                    disabled={importBerjalan}
-                    className="ml-auto px-4 py-2 rounded-lg bg-success text-white font-label-md text-label-md disabled:opacity-60"
-                  >
-                    {importBerjalan ? "Memproses..." : "Upload & Import"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => pilihFile(null)}
-                    className="px-3 py-2 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant"
-                  >
-                    Batal
-                  </button>
+                  <div className="flex gap-2 w-full sm:w-auto ml-auto">
+                    <button
+                      type="button"
+                      onClick={kirimImport}
+                      disabled={importBerjalan}
+                      className="flex-1 sm:flex-none px-4 py-2 rounded-lg bg-success text-white font-label-md text-label-md disabled:opacity-60"
+                    >
+                      {importBerjalan ? "Memproses..." : "Upload & Import"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => pilihFile(null)}
+                      className="px-3 py-2 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant"
+                    >
+                      Batal
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -695,8 +697,8 @@ export default function AdminPanel() {
             </div>
 
             {/* Toolbar pencarian + tambah */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative flex-1 min-w-[220px] max-w-md">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+              <div className="relative flex-1 min-w-0 sm:max-w-md">
                 <Search aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-outline w-4 h-4" />
                 <input
                   className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
@@ -712,14 +714,14 @@ export default function AdminPanel() {
               <button
                 type="button"
                 onClick={() => muatPendudukData(qPenduduk)}
-                className="px-4 py-2.5 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low"
+                className="px-4 py-2.5 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-low sm:hidden"
               >
                 Cari
               </button>
               <button
                 type="button"
                 onClick={bukaTambah}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-fixed-variant ml-auto"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-fixed-variant sm:ml-auto"
               >
                 <Plus aria-hidden="true" className="w-4 h-4" /> Tambah Penduduk
               </button>
@@ -925,11 +927,11 @@ export default function AdminPanel() {
             )}
           </div>
 
-          <div className="flex gap-3 justify-end pt-2">
+          <div className="flex flex-col-reverse sm:flex-row gap-3 justify-stretch sm:justify-end pt-2 sticky bottom-0 -mx-6 px-6 pb-1 bg-surface-container-lowest">
             <button
               type="button"
               onClick={() => setFormBuka(false)}
-              className="px-4 py-2.5 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant"
             >
               Batal
             </button>
@@ -937,7 +939,7 @@ export default function AdminPanel() {
               type="button"
               onClick={simpanPenduduk}
               disabled={simpanBerjalan}
-              className="px-6 py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
             >
               {simpanBerjalan ? "Menyimpan..." : "Simpan"}
             </button>

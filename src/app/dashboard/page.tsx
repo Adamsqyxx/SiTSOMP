@@ -149,13 +149,13 @@ export default function DashboardPage() {
              layanan surat + data penduduk dalam satu halaman. */
           <AdminPanel />
         ) : (
-        <div className="max-w-max-width mx-auto flex flex-col gap-8">
+        <div className="max-w-max-width mx-auto flex flex-col gap-6 md:gap-8">
           {/* Page header */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <BackButton fallbackHref="/" className="mb-3 -ml-1 md:hidden" />
-              <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard Warga</h1>
-              <p className="font-body-md text-body-md text-on-surface-variant mt-2">
+              <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">Dashboard Warga</h1>
+              <p className="font-body-sm text-body-sm md:font-body-md md:text-body-md text-on-surface-variant mt-2">
                 Pantau status pengajuan administrasi dan notifikasi terkini Anda.
               </p>
             </div>
@@ -171,11 +171,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Bento grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6">
             {/* Left column */}
-            <div className="lg:col-span-2 flex flex-col gap-6">
+            <div className="lg:col-span-2 flex flex-col gap-5 md:gap-6">
               {/* Active application status */}
-              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 relative overflow-hidden">
+              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 sm:p-6 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full pointer-events-none" />
                 {muatRiwayat ? (
                   <p className="font-body-md text-body-md text-on-surface-variant">Memuat status pengajuan...</p>
@@ -259,8 +259,8 @@ export default function DashboardPage() {
               </section>
 
               {/* Application history */}
-              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6">
-                <div className="flex justify-between items-center mb-6">
+              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 sm:p-6">
+                <div className="flex justify-between items-center mb-4 sm:mb-6 gap-2 flex-wrap">
                   <h2 className="font-headline-sm text-headline-sm text-on-surface">Riwayat Pengajuan</h2>
                   <Link
                     href="/layanan/surat"
@@ -276,8 +276,8 @@ export default function DashboardPage() {
                     Belum ada pengajuan surat.
                   </p>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                  <div className="overflow-x-auto -mx-1 px-1">
+                    <table className="w-full text-left border-collapse min-w-[480px]">
                       <thead>
                         <tr className="border-b border-outline-variant">
                           <th className="font-label-sm text-label-sm text-on-surface-variant py-3 pr-4">
@@ -360,9 +360,9 @@ export default function DashboardPage() {
             </div>
 
             {/* Right column: announcements */}
-            <div className="flex flex-col gap-6">
-              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 flex flex-col h-full">
-                <div className="flex justify-between items-center mb-6">
+            <div className="flex flex-col gap-5 md:gap-6">
+              <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 sm:p-6 flex flex-col h-full">
+                <div className="flex justify-between items-center mb-4 sm:mb-6">
                   <h2 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
                     <Megaphone aria-hidden="true" className="w-5 h-5 text-primary" />
                     Pengumuman
@@ -396,11 +396,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Footer */}
-          <footer className="relative w-full mt-12 border-t border-outline-variant py-8 grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-container-lowest">
+          <footer className="relative w-full mt-8 md:mt-12 border-t border-outline-variant py-6 md:py-8 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 bg-surface-container-lowest rounded-xl px-4 sm:px-0">
             <div className="font-body-sm text-body-sm text-on-surface-variant">
               © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
             </div>
-            <div className="flex gap-4 flex-wrap md:justify-end font-body-sm text-body-sm text-on-surface-variant">
+            <div className="flex gap-x-4 gap-y-2 flex-wrap md:justify-end font-body-sm text-body-sm text-on-surface-variant">
               <span className="hover:text-primary underline transition-opacity duration-150">Kontak Kami</span>
               <span className="hover:text-primary underline transition-opacity duration-150">Kebijakan Privasi</span>
               <span className="hover:text-primary underline transition-opacity duration-150">Portal Nasional</span>
