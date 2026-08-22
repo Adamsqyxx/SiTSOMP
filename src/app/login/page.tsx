@@ -49,7 +49,7 @@ export default function LoginPage() {
   return (
     <div className="bg-surface min-h-screen flex flex-col justify-center items-center relative overflow-hidden font-body-md">
       {/* Background decor: gradient brand + pola titik halus */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary-fixed/40 via-surface to-secondary-fixed/20 z-0" />
+      <div className="absolute inset-0 bg-gradient-to -br from-primary-fixed/40 via-surface to-secondary-fixed/20 z-0" />
       <div
         className="absolute inset-0 z-0 opacity-[0.03]"
         style={{
