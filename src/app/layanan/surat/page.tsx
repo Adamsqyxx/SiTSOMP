@@ -70,9 +70,9 @@ const SERVICES: Service[] = [
     desc: "Dokumen pendukung untuk mengurus akta kematian di Dinas Kependudukan dan Catatan Sipil.",
     requirements: ["Surat keterangan RS/Dokter", "KTP Asli Almarhum", "KK Asli Almarhum"],
     icon: FileWarning,
-    iconClass: "bg-surface-container-highest text-on-surface-variant",
-    action: "Lihat Detail",
-    actionClass: "border border-primary text-primary hover:bg-surface-container-low",
+    iconClass: "bg-secondary-fixed text-secondary",
+    action: "Buat Pengajuan",
+    actionClass: "bg-primary text-on-primary hover:bg-on-primary-fixed-variant",
   },
 ];
 
@@ -104,7 +104,7 @@ export default function LayananSuratPage() {
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
       <AppHeader />
 
-      <main className="flex-1 pt-16 lg:pt-8 lg:pl-64 px-margin-mobile md:px-margin-desktop pb-8">
+      <main className="flex-1 pt-20 lg:pt-8 lg:pl-16 px-margin-mobile md:px-margin-desktop pb-16">
         <div className="max-w-max-width mx-auto">
           <div className="mb-8">
             <h1 className="font-headline-lg text-headline-lg text-primary mb-2">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -338,7 +337,7 @@ export default function AdminPage() {
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />
 
-      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
         <div className="max-w-max-width mx-auto flex flex-col gap-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">

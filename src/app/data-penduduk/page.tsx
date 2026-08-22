@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   MapPin,
   Search,
@@ -53,7 +52,7 @@ export default function DataPendudukPage() {
       <AppHeader />
 
       {/* Content */}
-      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
         <div className="max-w-max-width mx-auto flex flex-col gap-6">
           <div>
               <BackButton fallbackHref="/" className="mb-3 -ml-1" />

@@ -105,7 +105,7 @@ export default function PengaduanPage() {
     <div className="bg-background text-on-background font-body-md text-body-md min-h-screen flex flex-col">
       <AppHeader />
 
-      <main className="w-full max-w-max-width mx-auto flex-grow pt-20 lg:pt-8 lg:pl-64 p-margin-mobile md:p-margin-desktop">
+      <main className="w-full max-w-max-width mx-auto flex-grow pt-20 lg:pt-8 lg:pl-16 px-margin-mobile md:px-margin-desktop pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Left: form */}
           <section className="lg:col-span-3 bg-surface-container-lowest border border-border-subtle rounded-xl p-6 md:p-8">

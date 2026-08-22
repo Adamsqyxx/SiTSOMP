@@ -46,7 +46,7 @@ export default function NotFound() {
       <AppHeader />
 
       {/* Konten utama */}
-      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full flex items-center justify-center">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full flex items-center justify-center">
         <div className="w-full max-w-xl text-center py-10">
           <BackButton fallbackHref="/" className="mb-8 inline-flex" />
 

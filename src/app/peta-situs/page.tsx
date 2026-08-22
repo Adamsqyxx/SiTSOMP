@@ -36,7 +36,7 @@ export default function PetaSitusPage() {
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />
 
-      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
         <div className="mb-10">
           <BackButton fallbackHref="/" className="mb-3 -ml-1" />
           <span className="inline-block px-3 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded-full mb-3">

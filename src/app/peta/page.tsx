@@ -315,7 +315,7 @@ export default function PetaPage() {
     <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen">
       <AppHeader />
 
-      <div className="flex flex-1 pt-16 lg:pt-0 lg:pl-64 h-full w-full">
+      <div className="flex flex-1 pt-16 lg:pt-0 lg:pl-16 h-full w-full">
         {/* Main GIS work area */}
         <main className="flex-1 flex h-full relative">
           {/* Persistent side panel (desktop) */}

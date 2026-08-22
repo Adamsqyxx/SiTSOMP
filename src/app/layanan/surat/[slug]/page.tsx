@@ -144,7 +144,7 @@ export default function PengajuanPage() {
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
       <AppHeader />
 
-      <main className="flex-1 pt-16 lg:pt-8 lg:pl-64 w-full max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8">
+      <main className="flex-1 pt-20 lg:pt-8 lg:pl-16 w-full max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop pb-16">
         <div className="mb-8">
           <BackButton fallbackHref="/layanan/surat" className="mb-3 -ml-1 md:hidden" />
           <span className="inline-block px-3 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded-full mb-3 uppercase tracking-wide">

@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { FileText, Map, Megaphone, Users } from "lucide-react";
 import AppHeader from "@/components/app-header";
-import BackButton from "@/components/back-button";
 
 export default function BerandaPage() {
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />
 
-      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-20 md:pb-8 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
         {/* Hero Section */}
         <section className="relative rounded-2xl overflow-hidden mb-12 bg-surface-container-high h-[400px] md:h-[500px] flex items-end">
           <div
