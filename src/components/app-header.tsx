@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, FileText, Map, Megaphone, User, LayoutDashboard, Menu, X } from "lucide-react";
@@ -16,14 +16,35 @@ const NAV = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: false },
 ] as const;
 
+// Role staf kelurahan (sinkron src/lib/admin-auth.ts & dashboard/page.tsx).
+// Staf tidak mengajukan surat — menu Layanan disembunyikan untuk mereka.
+const STAFF_ROLES = ["super_admin", "lurah", "sekretaris", "petugas"];
+
 export default function AppHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!cancelled) setRole((d?.user?.role as string | undefined) ?? null);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const isStaff = !!role && (STAFF_ROLES as string[]).includes(role);
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
-  const navLinks = NAV.map((item) => {
+  const navLinks = NAV.filter((item) => !(isStaff && item.href === "/layanan/surat")).map(
+    (item) => {
     const active = isActive(item.href, item.exact);
     return (
       <Link
