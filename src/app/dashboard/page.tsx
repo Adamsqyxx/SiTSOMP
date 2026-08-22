@@ -298,7 +298,8 @@ export default function DashboardPage() {
                         {riwayat.map((row) => (
                           <tr
                             key={row.id}
-                            className="border-b border-border-subtle hover:bg-surface-muted transition-colors"
+                            onClick={() => router.push(`/dashboard/permohonan/${row.id}`)}
+                            className="border-b border-border-subtle hover:bg-surface-muted transition-colors cursor-pointer"
                           >
                             <td className="py-4 pr-4">
                               <div className="font-medium">{row.jenis_surat}</div>
@@ -329,25 +330,21 @@ export default function DashboardPage() {
                             </td>
                             <td className="py-4 pl-4 text-right">
                               {row.status === "selesai" || row.status === "disetujui" ? (
-                                <button
-                                  type="button"
-                                  onClick={() => router.push("/layanan/surat")}
-                                  className="text-primary hover:text-primary-fixed-variant transition-colors"
+                                <span
+                                  className="inline-block text-primary hover:text-primary-fixed-variant transition-colors"
                                   title="Unduh Dokumen"
                                   aria-label="Unduh Dokumen"
                                 >
                                   <Download aria-hidden="true" className="w-5 h-5" />
-                                </button>
+                                </span>
                               ) : (
-                                <button
-                                  type="button"
-                                  onClick={() => router.push("/layanan/surat")}
-                                  className="text-outline hover:text-on-surface transition-colors"
+                                <span
+                                  className="inline-block text-outline hover:text-on-surface transition-colors"
                                   title="Lihat Detail"
                                   aria-label="Lihat Detail"
                                 >
                                   <Eye aria-hidden="true" className="w-5 h-5" />
-                                </button>
+                                </span>
                               )}
                             </td>
                           </tr>
