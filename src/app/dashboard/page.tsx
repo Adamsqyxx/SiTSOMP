@@ -7,22 +7,13 @@ import {
   Download,
   Eye,
   FileText,
-  LayoutDashboard,
   Megaphone,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AuthButtons from "@/components/auth-buttons";
+import AppSidebar from "@/components/app-sidebar";
 import BackButton from "@/components/back-button";
 
 const ADMIN_ROLES = ["super_admin", "lurah", "sekretaris", "petugas"] as const;
-
-const DESKTOP_NAV = [
-  { label: "Beranda", href: "/", active: false },
-  { label: "Layanan", href: "/layanan/surat", active: false },
-  { label: "Peta", href: "/peta", active: false },
-  { label: "Profil", href: "/profil", active: false },
-] as const;
 
 interface Riwayat {
   id: string;
@@ -139,55 +130,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
-      {/* TopAppBar — pola header publik SiTSOMP */}
-      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant transition-colors duration-200">
-        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50 max-w-max-width mx-auto">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
-              SiTSOMP
-            </Link>
-          </div>
-
-          <nav className="hidden md:flex gap-6 items-center">
-            {DESKTOP_NAV.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  "font-label-md text-label-md transition-colors",
-                  item.active
-                    ? "text-primary font-semibold border-b-2 border-primary pb-1"
-                    : "text-on-surface-variant hover:text-primary"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2 md:gap-3">
-            {user && (ADMIN_ROLES as readonly string[]).includes(user.role ?? "") && (
-              <Link
-                href="/admin"
-                className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
-              >
-                <LayoutDashboard aria-hidden="true" className="w-4 h-4" />
-                <span className="hidden sm:inline">Panel Admin</span>
-              </Link>
-            )}
-            <AuthButtons className="hidden md:flex" />
-            <Link
-              href="/login"
-              aria-label="Profil"
-              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-              title="Masuk"
-            >
-              <User aria-hidden="true" className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col md:pl-64">
+      <AppSidebar />
 
       {/* Content */}
       <main className="flex-grow pt-16 md:pt-24 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
@@ -195,7 +139,7 @@ export default function DashboardPage() {
           {/* Page header */}
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <BackButton fallbackHref="/" className="mb-3 -ml-1" />
+              <BackButton fallbackHref="/" className="mb-3 -ml-1 md:hidden" />
               <h1 className="font-headline-lg text-headline-lg text-on-surface">Dashboard Warga</h1>
               <p className="font-body-md text-body-md text-on-surface-variant mt-2">
                 Pantau status pengajuan administrasi dan notifikasi terkini Anda.

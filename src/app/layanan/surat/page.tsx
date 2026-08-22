@@ -5,41 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  Bell,
-  FileText,
   FileWarning,
   HandHeart,
-  Home,
-  LayoutDashboard,
-  Map,
   MapPin,
-  Menu,
-  Route,
   Search,
-  Settings,
   Store,
-  User,
-  Users,
-  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AuthButtons from "@/components/auth-buttons";
-import BackButton from "@/components/back-button";
-
-const DESKTOP_NAV = [
-  { label: "Beranda", icon: Home, href: "/", active: false },
-  { label: "Layanan", icon: FileText, href: "/layanan/surat", active: true },
-  { label: "Peta", icon: Map, href: "/peta", active: false },
-  { label: "Profil", icon: User, href: "/profil", active: false },
-] as const;
-
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: false },
-  { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
-  { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: true },
-  { label: "Peta Wilayah", icon: Route, href: "/peta", active: false },
-  { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
-] as const;
+import AppSidebar from "@/components/app-sidebar";
 
 const CATEGORIES = ["Semua", "Kependudukan", "Usaha", "Sosial"] as const;
 
@@ -103,48 +76,10 @@ const SERVICES: Service[] = [
   },
 ];
 
-function SidebarContent() {
-  return (
-    <>
-      <div className="flex items-center gap-4 px-4 py-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant flex-shrink-0 flex items-center justify-center font-label-md font-bold text-on-surface">
-          AK
-        </div>
-        <div>
-          <h2 className="font-headline-sm text-headline-sm font-bold text-primary">Admin Kelurahan</h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">Tiro Sompe</p>
-          <span className="font-label-sm text-label-sm text-outline">v1.0.2</span>
-        </div>
-      </div>
-      <nav className="flex flex-col gap-1">
-        {SIDEBAR_ITEMS.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 mx-2 rounded-full font-body-md text-body-md transition-all duration-200",
-              item.active
-                ? "bg-primary-container text-on-primary-container"
-                : "text-on-surface-variant hover:bg-surface-container-high"
-            )}
-          >
-            <item.icon aria-hidden="true" className="w-5 h-5" />
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-      <div className="mt-auto p-4 border-t border-outline-variant">
-        <AuthButtons stacked />
-      </div>
-    </>
-  );
-}
-
 export default function LayananSuratPage() {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string>("Semua");
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -166,85 +101,11 @@ export default function LayananSuratPage() {
   };
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
-      {/* TopAppBar */}
-      <header className="bg-surface text-primary border-b border-outline-variant transition-colors duration-200 fixed top-0 w-full z-50 flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            aria-label="Menu"
-            onClick={() => setDrawerOpen(true)}
-            className="md:hidden hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center text-on-surface-variant"
-          >
-            <Menu aria-hidden="true" className="w-5 h-5" />
-          </button>
-          <BackButton
-            fallbackHref="/"
-            label=""
-            className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-          />
-          <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</Link>
-        </div>
+    <div className="bg-background text-on-background min-h-screen flex flex-col md:pl-64 font-body-md antialiased">
+      <AppSidebar />
 
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-2">
-          {DESKTOP_NAV.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full font-label-md text-label-md transition-colors duration-200",
-                item.active
-                  ? "bg-secondary-container text-on-secondary-container"
-                  : "text-on-surface-variant hover:bg-surface-container-low"
-              )}
-            >
-              <item.icon aria-hidden="true" className="w-5 h-5" />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2 md:gap-3">
-          <button
-            type="button"
-            aria-label="Notifikasi"
-            onClick={() => router.push("/pengumuman")}
-            className="hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center text-on-surface-variant"
-            title="Lihat pengumuman"
-          >
-            <Bell aria-hidden="true" className="w-5 h-5" />
-          </button>
-          <AuthButtons className="hidden md:flex" />
-        </div>
-      </header>
-
-      {/* Mobile drawer */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-          <nav className="absolute left-0 top-0 h-full w-[280px] bg-surface flex flex-col pt-4 shadow-xl">
-            <button
-              type="button"
-              aria-label="Tutup menu"
-              onClick={() => setDrawerOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low z-10"
-            >
-              <X aria-hidden="true" className="w-5 h-5" />
-            </button>
-            <SidebarContent />
-          </nav>
-        </div>
-      )}
-
-      <div className="flex flex-1 pt-16 w-full max-w-max-width mx-auto">
-        {/* Sidebar (desktop) */}
-        <aside className="hidden md:flex flex-col py-4 gap-2 bg-surface text-primary border-r border-outline-variant shadow-md fixed left-0 top-16 h-[calc(100vh-4rem)] w-[280px]">
-          <SidebarContent />
-        </aside>
-
-        {/* Main content */}
-        <main className="flex-1 px-margin-mobile md:px-margin-desktop py-8 md:ml-[280px]">
+      <main className="flex-1 pt-16 px-margin-mobile md:px-margin-desktop pb-8">
+        <div className="max-w-max-width mx-auto">
           <div className="mb-8">
             <h1 className="font-headline-lg text-headline-lg text-primary mb-2">
               Layanan Surat Administrasi
@@ -338,8 +199,8 @@ export default function LayananSuratPage() {
               ))}
             </div>
           )}
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Footer */}
       <footer className="bg-surface-container-lowest text-primary font-body-sm text-body-sm border-t border-outline-variant transition-opacity duration-150 relative w-full mt-auto py-8 px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-4 max-w-max-width mx-auto">

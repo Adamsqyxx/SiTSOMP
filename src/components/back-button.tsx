@@ -7,18 +7,16 @@ import { cn } from "@/lib/utils";
 interface BackButtonProps {
   /** Tujuan fallback saat tidak ada riwayat navigasi sebelumnya. Default: beranda. */
   fallbackHref?: string;
-  label?: string;
   className?: string;
 }
 
 /**
- * Tombol kembali konsisten untuk semua halaman SiTSOMP.
+ * Tombol kembali konsisten untuk semua halaman SiTSOMP (ikon saja, tanpa teks).
  * Mencoba router.back() terlebih dahulu; jika tidak ada riwayat
  * (halaman dibuka langsung / deep-link), arahkan ke fallbackHref.
  */
 export default function BackButton({
   fallbackHref = "/",
-  label = "Kembali",
   className,
 }: BackButtonProps) {
   const router = useRouter();
@@ -35,13 +33,14 @@ export default function BackButton({
     <button
       type="button"
       onClick={handleClick}
+      aria-label="Kembali"
+      title="Kembali"
       className={cn(
-        "inline-flex items-center gap-2 font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors",
+        "inline-flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-low rounded-full p-2 transition-colors",
         className
       )}
     >
-      <ArrowLeft aria-hidden="true" className="w-4 h-4" />
-      {label}
+      <ArrowLeft aria-hidden="true" className="w-5 h-5" />
     </button>
   );
 }

@@ -3,37 +3,10 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import {
-  Bell,
-  CheckCircle2,
-  FileText,
-  Home,
-  LayoutDashboard,
-  Map,
-  Menu,
-  Route,
-  Settings,
-  User,
-  Users,
-  X,
-} from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import AppSidebar from "@/components/app-sidebar";
 import BackButton from "@/components/back-button";
-
-const DESKTOP_NAV = [
-  { label: "Beranda", icon: Home, href: "/", active: false },
-  { label: "Layanan", icon: FileText, href: "/layanan/surat", active: true },
-  { label: "Peta", icon: Map, href: "/peta", active: false },
-  { label: "Profil", icon: User, href: "/profil", active: false },
-] as const;
-
-const SIDEBAR_ITEMS = [
-  { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard", active: false },
-  { label: "Data Penduduk", icon: Users, href: "/data-penduduk", active: false },
-  { label: "Administrasi", icon: FileText, href: "/layanan/surat", active: true },
-  { label: "Peta Wilayah", icon: Route, href: "/peta", active: false },
-  { label: "Pengaturan", icon: Settings, href: "/pengaturan", active: false },
-] as const;
 
 interface FormField {
   id: string;

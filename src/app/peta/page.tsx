@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   MapPin,
   Search,
-  User,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AuthButtons from "@/components/auth-buttons";
-import BackButton from "@/components/back-button";
+import AppSidebar from "@/components/app-sidebar";
 
 // Daftar kategori fasilitas (dipetakan ke nilai enum JenisLokasi).
 const CATEGORIES = [
@@ -19,13 +16,6 @@ const CATEGORIES = [
   { label: "Pendidikan", key: "pendidikan", color: "text-on-primary-container" },
   { label: "Pemerintahan", key: "pemerintahan", color: "text-tertiary" },
   { label: "Ibadah", key: "ibadah", color: "text-secondary" },
-] as const;
-
-const DESKTOP_NAV = [
-  { label: "Beranda", href: "/", active: false },
-  { label: "Layanan", href: "/layanan/surat", active: false },
-  { label: "Peta", href: "/peta", active: true },
-  { label: "Profil", href: "/profil", active: false },
 ] as const;
 
 // Batas RT/RW sementara disembunyikan dari legenda (data resmi belum tersedia).
@@ -322,60 +312,8 @@ export default function PetaPage() {
   }, [allFeatures, query, categoryKey]);
 
   return (
-    <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen">
-      {/* TopAppBar — pola header publik SiTSOMP */}
-      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant transition-colors duration-200">
-        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50 max-w-max-width mx-auto">
-          <div className="flex items-center gap-4">
-            <BackButton
-              fallbackHref="/"
-              label=""
-              className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-            />
-            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
-              SiTSOMP
-            </Link>
-          </div>
-
-          <nav className="hidden md:flex gap-6 items-center">
-            {DESKTOP_NAV.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  "font-label-md text-label-md transition-colors",
-                  item.active
-                    ? "text-primary font-semibold border-b-2 border-primary pb-1"
-                    : "text-on-surface-variant hover:text-primary"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2 md:gap-3">
-            <button
-              type="button"
-              aria-label="Cari"
-              onClick={() => setSearchOpen(true)}
-              className="md:hidden text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full flex items-center justify-center"
-              title="Cari lokasi"
-            >
-              <Search aria-hidden="true" className="w-5 h-5" />
-            </button>
-            <AuthButtons className="hidden md:flex" />
-            <Link
-              href="/login"
-              aria-label="Profil"
-              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-              title="Masuk"
-            >
-              <User aria-hidden="true" className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen md:pl-64">
+      <AppSidebar />
 
       <div className="flex flex-1 pt-16 h-full w-full">
         {/* Main GIS work area */}
@@ -398,7 +336,36 @@ export default function PetaPage() {
           </aside>
 
           {/* Map display area */}
-          <section className="flex-1 relative bg-surface-dim overflow-hidden">
+          <section className="flex-1 flex flex-col relative bg-surface-dim overflow-hidden">
+            {/* Filter kategori — mobile (selalu terlihat, sejajar dengan panel desktop) */}
+            <div className="md:hidden flex items-center gap-2 px-3 py-2 bg-surface border-b border-outline-variant overflow-x-auto z-[550]">
+              <button
+                type="button"
+                aria-label="Cari lokasi"
+                onClick={() => setSearchOpen(true)}
+                className="shrink-0 text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full"
+                title="Cari lokasi"
+              >
+                <Search aria-hidden="true" className="w-5 h-5" />
+              </button>
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.key}
+                  type="button"
+                  onClick={() => setCategoryKey(cat.key)}
+                  className={cn(
+                    "shrink-0 px-3 py-1.5 rounded-full font-label-sm text-label-sm transition-colors",
+                    categoryKey === cat.key
+                      ? "bg-primary text-on-primary"
+                      : "bg-surface-container-low text-on-surface-variant border border-outline-variant"
+                  )}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex-1 relative">
             {/* Interaktif Leaflet map */}
             <LeafletMap
               onSelect={setSelected}
@@ -537,6 +504,7 @@ export default function PetaPage() {
             <div className="absolute bottom-6 right-6 bg-surface-container-lowest/80 backdrop-blur-sm px-3 py-1 rounded border border-outline-variant/50 font-code-md text-code-md text-on-surface-variant shadow-sm hidden md:flex items-center">
               100m
               <div className="inline-block w-16 h-1 border-x-2 border-b-2 border-outline-variant ml-2 align-middle" />
+            </div>
             </div>
           </section>
         </main>
