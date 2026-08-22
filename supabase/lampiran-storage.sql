@@ -1,48 +1,28 @@
--- ============================================================
--- SiTSOMP — Bucket lampiran pengajuan surat (Supabase Storage)
--- ============================================================
--- Jalankan di Supabase SQL Editor (Dashboard > SQL > New query).
--- Bucket dibuat PUBLIC agar URL bisa dibuka staf kelurahan tanpa auth.
--- RLS mengizinkan ANON upload (insert) — wajib karena frontend pakai
--- anon key (tidak ada service-role key di env). Siapa pun bisa upload,
--- tapi TIDAK bisa list/delete/update (policy cuma INSERT).
--- Path file: <userId>/<slug>/<timestamp>-<random>-<namaFile> (unik, tidak
--- bisa ditebak), sehingga tabrakan/overwrite antar warga kecil kemungkinannya.
+-- Setup Storage untuk lampiran pengajuan surat.
+-- Referensi: src/lib/lampiran.ts (LAMPIRAN_BUCKET = "lampiran-surat")
+--
+-- Cara pakai:
+-- 1. Dashboard Supabase → Storage → New bucket
+--    Nama: lampiran-surat  |  Public bucket: YES
+--    (atau jalankan SQL di bawah via SQL Editor)
+-- 2. Jalankan policy INSERT + SELECT di bawah.
+--
+-- Catatan: insert ke storage.buckets hanya bisa oleh service_role /
+-- dashboard owner — kalau SQL Editor menolak, buat bucket manual lewat UI.
 
--- 1) Buat bucket (abaikan error kalau sudah ada)
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'lampiran-surat',
-  'lampiran-surat',
-  true,
-  5242880, -- 5 MB
-  array['image/jpeg','image/png','image/webp','application/pdf']
-)
-on conflict (id) do update
-  set public = true,
-      file_size_limit = 5242880,
-      allowed_mime_types = array['image/jpeg','image/png','image/webp','application/pdf'];
+insert into storage.buckets (id, name, public)
+values ('lampiran-surat', 'lampiran-surat', true)
+on conflict (id) do update set public = true;
 
--- 2) Pastikan RLS aktif di storage.objects
-alter table storage.objects enable row level security;
+-- Siapa pun boleh upload lampiran (form pengajuan dipakai warga login
+-- via NextAuth, TAPI upload dari browser pakai anon key — bukan Supabase Auth).
+create policy "anon dapat upload lampiran"
+on storage.objects for insert
+to anon
+with check (bucket_id = 'lampiran-surat');
 
--- 3) Izinkan ANON (dan user login) INSERT ke bucket ini.
---    Path diawali userId agar warga cuma bisa tulis ke foldernya sendiri.
-drop policy if exists "lampiran_anon_insert" on storage.objects;
-create policy "lampiran_anon_insert" on storage.objects
-  for insert
-  to anon, authenticated
-  with check (
-    bucket_id = 'lampiran-surat'
-    and (storage.foldername(name))[1] = auth.uid()::text
-  );
-
--- 4) Izinkan publik (termasuk staf) SELECT/READ file (bucket public).
-drop policy if exists "lampiran_public_read" on storage.objects;
-create policy "lampiran_public_read" on storage.objects
-  for select
-  to anon, authenticated
-  using ( bucket_id = 'lampiran-surat' );
-
--- Catatan: tidak ada policy UPDATE/DELETE → warga tidak bisa ubah/hapus
--- file orang lain maupun miliknya sendiri setelah terunggah.
+-- URL publik bisa dibaca staf kelurahan saat verifikasi berkas.
+create policy "publik dapat baca lampiran"
+on storage.objects for select
+to anon
+using (bucket_id = 'lampiran-surat');
