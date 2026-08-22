@@ -104,7 +104,7 @@ export default function LayananSuratPage() {
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
       <AppHeader />
 
-      <main className="flex-1 pt-16 px-margin-mobile md:px-margin-desktop pb-8">
+      <main className="flex-1 pt-16 lg:pt-8 lg:pl-64 px-margin-mobile md:px-margin-desktop pb-8">
         <div className="max-w-max-width mx-auto">
           <div className="mb-8">
             <h1 className="font-headline-lg text-headline-lg text-primary mb-2">

@@ -41,7 +41,7 @@ export default function PengumumanPage() {
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />
 
-      <main className="flex-grow pt-16 md:pt-24 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
+      <main className="flex-grow pt-16 md:pt-24 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full">
         <div className="mb-8">
           <BackButton fallbackHref="/" className="mb-3 -ml-1 md:hidden" />
           <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface mb-2">
