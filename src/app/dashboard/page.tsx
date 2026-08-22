@@ -10,7 +10,7 @@ import {
   Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AppSidebar from "@/components/app-sidebar";
+import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 
 interface Riwayat {
@@ -128,8 +128,8 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col md:pl-64">
-      <AppSidebar />
+    <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+      <AppHeader />
 
       {/* Content */}
       <main className="flex-grow pt-16 md:pt-24 pb-16 px-margin-mobile md:px-margin-desktop bg-background">

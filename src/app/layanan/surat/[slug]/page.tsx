@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
-import AppSidebar from "@/components/app-sidebar";
+import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 
 interface FormField {
@@ -141,8 +141,8 @@ export default function PengajuanPage() {
   }
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased md:pl-64">
-      <AppSidebar />
+    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
+      <AppHeader />
 
       <main className="flex-1 pt-16 w-full max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8">
         <div className="mb-8">

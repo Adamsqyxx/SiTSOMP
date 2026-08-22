@@ -7,7 +7,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AppSidebar from "@/components/app-sidebar";
+import AppHeader from "@/components/app-header";
 
 // Daftar kategori fasilitas (dipetakan ke nilai enum JenisLokasi).
 const CATEGORIES = [
@@ -312,8 +312,8 @@ export default function PetaPage() {
   }, [allFeatures, query, categoryKey]);
 
   return (
-    <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen md:pl-64">
-      <AppSidebar />
+    <div className="bg-background text-on-background font-body-md text-body-md overflow-hidden flex flex-col h-screen">
+      <AppHeader />
 
       <div className="flex flex-1 pt-16 h-full w-full">
         {/* Main GIS work area */}

@@ -12,7 +12,7 @@ import {
   Store,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import AppSidebar from "@/components/app-sidebar";
+import AppHeader from "@/components/app-header";
 
 const CATEGORIES = ["Semua", "Kependudukan", "Usaha", "Sosial"] as const;
 
@@ -101,8 +101,8 @@ export default function LayananSuratPage() {
   };
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex flex-col md:pl-64 font-body-md antialiased">
-      <AppSidebar />
+    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
+      <AppHeader />
 
       <main className="flex-1 pt-16 px-margin-mobile md:px-margin-desktop pb-8">
         <div className="max-w-max-width mx-auto">
