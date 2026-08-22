@@ -7,19 +7,12 @@ import {
   Megaphone,
   SearchX,
 } from "lucide-react";
+import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 
 export const metadata = {
   title: "404 - Halaman Tidak Ditemukan",
 };
-
-const NAV_LINKS = [
-  { label: "Beranda", href: "/" },
-  { label: "Layanan", href: "/layanan/surat" },
-  { label: "Peta", href: "/peta" },
-  { label: "Profil", href: "/profil" },
-];
-
 const QUICK_LINKS = [
   {
     label: "Beranda",
@@ -50,33 +43,10 @@ const QUICK_LINKS = [
 export default function NotFound() {
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
-      {/* Header publik standar SiTSOMP */}
-      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant">
-        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="font-headline-md text-headline-md font-bold text-primary"
-            >
-              SiTSOMP
-            </Link>
-          </div>
-          <nav className="hidden md:flex gap-6 items-center">
-            {NAV_LINKS.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <AppHeader />
 
       {/* Konten utama */}
-      <main className="flex-grow pt-24 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full flex items-center justify-center">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto w-full flex items-center justify-center">
         <div className="w-full max-w-xl text-center py-10">
           <BackButton fallbackHref="/" className="mb-8 inline-flex" />
 

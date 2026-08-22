@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { FileText, Map, Megaphone, Users } from "lucide-react";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 

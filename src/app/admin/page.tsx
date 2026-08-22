@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BackButton from "@/components/back-button";
+import AppHeader from "@/components/app-header";
 
 // ── Konstanta tampilan ────────────────────────────────────────────────
 const FORMAT_DITERIMA = [".xlsx", ".xlsm", ".csv", ".ods", ".xlsb"];
@@ -335,33 +336,28 @@ export default function AdminPage() {
 
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant">
-        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto">
-          <div className="flex items-center gap-3">
-            <BackButton
-              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-            />
-            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
-              SiTSOMP
-            </Link>
-            <span className="hidden sm:inline-block bg-primary-container text-on-primary-container font-label-sm text-label-sm px-3 py-1 rounded-full">
-              Panel Admin
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => router.push("/dashboard?tampilan=warga")}
-            className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
-          >
-            <User aria-hidden="true" className="w-4 h-4" />
-            <span className="hidden sm:inline">Tampilan Warga</span>
-          </button>
-        </div>
-      </header>
+      <AppHeader />
 
-      <main className="flex-grow pt-20 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
         <div className="max-w-max-width mx-auto flex flex-col gap-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <BackButton
+                className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
+              />
+              <span className="bg-primary-container text-on-primary-container font-label-sm text-label-sm px-3 py-1 rounded-full">
+                Panel Admin
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => router.push("/dashboard?tampilan=warga")}
+              className="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors flex items-center gap-2"
+            >
+              <User aria-hidden="true" className="w-4 h-4" />
+              <span className="hidden sm:inline">Tampilan Warga</span>
+            </button>
+          </div>
           <div>
             <h1 className="font-headline-lg text-headline-lg text-on-surface">
               Dashboard Admin

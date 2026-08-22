@@ -1,61 +1,18 @@
 import Link from "next/link";
-import { ShieldCheck, User } from "lucide-react";
-import { cn } from "@/lib/utils";
-import AuthButtons from "@/components/auth-buttons";
+import { ShieldCheck } from "lucide-react";
+import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 
 export const metadata = {
   title: "Kebijakan Privasi",
 };
 
-const DESKTOP_NAV = [
-  { label: "Beranda", href: "/", active: false },
-  { label: "Layanan", href: "/layanan/surat", active: false },
-  { label: "Peta", href: "/peta", active: false },
-  { label: "Profil", href: "/profil", active: false },
-] as const;
-
 export default function KebijakanPrivasiPage() {
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
-      <header className="bg-surface fixed top-0 w-full z-50 border-b border-outline-variant transition-colors duration-200">
-        <div className="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop z-50 max-w-max-width mx-auto">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
-              SiTSOMP
-            </Link>
-          </div>
-          <nav className="hidden md:flex gap-6 items-center">
-            {DESKTOP_NAV.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  "font-label-md text-label-md transition-colors",
-                  item.active
-                    ? "text-primary font-semibold border-b-2 border-primary pb-1"
-                    : "text-on-surface-variant hover:text-primary"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-2 md:gap-3">
-            <AuthButtons className="hidden md:flex" />
-            <Link
-              href="/login"
-              aria-label="Profil"
-              className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-              title="Masuk"
-            >
-              <User aria-hidden="true" className="w-5 h-5" />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <AppHeader />
 
-      <main className="flex-grow pt-24 pb-16 px-margin-mobile md:px-margin-desktop max-w-3xl mx-auto w-full">
+      <main className="flex-grow pt-20 lg:pt-8 lg:pl-64 pb-16 px-margin-mobile md:px-margin-desktop max-w-3xl mx-auto w-full">
         <div className="flex items-center gap-3 mb-8">
           <BackButton fallbackHref="/" className="-ml-1" />
         </div>

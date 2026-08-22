@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Building2, Clock, Mail, MapPin, Phone } from "lucide-react";
 import AppHeader from "@/components/app-header";
+import BackButton from "@/components/back-button";
 
 export const metadata = {
   title: "Kontak Kami",

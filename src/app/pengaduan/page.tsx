@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowLeft, Clock, MapPin, MessageSquareWarning } from "lucide-react";
+import { AlertCircle, Clock, MapPin } from "lucide-react";
 import { Toaster } from "sonner";
+import AppHeader from "@/components/app-header";
 import ComplaintForm from "@/components/complaint-form";
 
 const STATUS_LABEL: Record<string, { label: string; className: string }> = {
@@ -102,32 +103,9 @@ export default function PengaduanPage() {
 
   return (
     <div className="bg-background text-on-background font-body-md text-body-md min-h-screen flex flex-col">
-      {/* TopAppBar */}
-      <header className="bg-surface sticky top-0 z-50 border-b border-outline-variant transition-colors duration-200 flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            aria-label="Kembali ke beranda"
-            className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2 transition-colors"
-          >
-            <ArrowLeft aria-hidden="true" className="w-5 h-5" />
-          </Link>
-          <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
-            SiTSOMP
-          </Link>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href="/pengaduan"
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-fixed-variant transition-colors shadow-sm"
-          >
-            <MessageSquareWarning aria-hidden="true" className="w-4 h-4" />
-            Buat Pengaduan
-          </Link>
-        </div>
-      </header>
+      <AppHeader />
 
-      <main className="w-full max-w-max-width mx-auto flex-grow p-margin-mobile md:p-margin-desktop">
+      <main className="w-full max-w-max-width mx-auto flex-grow pt-20 lg:pt-8 lg:pl-64 p-margin-mobile md:p-margin-desktop">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
           {/* Left: form */}
           <section className="lg:col-span-3 bg-surface-container-lowest border border-border-subtle rounded-xl p-6 md:p-8">
