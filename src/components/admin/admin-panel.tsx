@@ -18,13 +18,20 @@ import {
   XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import dynamicImport from "next/dynamic";
+
+// Editor konten statis (kontak/kebijakan/peta situs) dimuat lazy —
+// hanya saat tab Konten dibuka.
+const KontenEditor = dynamicImport(
+  () => import("@/components/admin/konten-editor")
+);
 
 // ── Konstanta tampilan ────────────────────────────────────────────────
 const FORMAT_DITERIMA = [".xlsx", ".xlsm", ".csv", ".ods", ".xlsb"];
 const PESAN_FORMAT_SALAH =
   "Format file tidak sesuai. Hanya file .xlsx, .xlsm, .csv, .ods, atau .xlsb yang dapat diupload.";
 
-type Tab = "layanan" | "penduduk";
+type Tab = "layanan" | "penduduk" | "konten";
 
 const STATUS_FILTERS = [
   { key: "", label: "Semua" },
@@ -373,6 +380,19 @@ export default function AdminPanel() {
           >
             <Users aria-hidden="true" className="w-4 h-4" />
             Data Penduduk
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("konten")}
+            className={cn(
+              "flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
+              tab === "konten"
+                ? "border-primary text-primary font-semibold"
+                : "border-transparent text-on-surface-variant hover:text-on-surface"
+            )}
+          >
+            <FileText aria-hidden="true" className="w-4 h-4" />
+            Konten
           </button>
         </div>
 
@@ -833,6 +853,13 @@ export default function AdminPanel() {
                 <p className="font-label-sm text-label-sm text-outline">{penduduk.length} penduduk ditampilkan</p>
               </>
             )}
+          </section>
+        )}
+
+        {/* ══════════ TAB KONTEN STATIS ══════════ */}
+        {tab === "konten" && (
+          <section className="flex flex-col gap-4 md:gap-5">
+            <KontenEditor />
           </section>
         )}
       </div>

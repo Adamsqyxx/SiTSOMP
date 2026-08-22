@@ -7,6 +7,7 @@ import {
   type KebijakanPrivasiKonten,
   type PetaSitusKonten,
 } from "@/lib/site-content";
+import { cn } from "@/lib/utils";
 
 // Editor konten statis untuk tab Konten di dashboard admin.
 // Tiga bagian: kontak, kebijakan privasi, peta situs.
@@ -240,3 +241,164 @@ export default function KontenEditor() {
           )}
         </div>
       </section>
+
+      {/* ── PETA SITUS ── */}
+      <section className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4 md:p-5 flex flex-col gap-3">
+        <div className="flex items-center justify-between flex-wrap gap-2">
+          <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold">
+            {LABEL_BAGIAN.peta_situs}
+          </h2>
+          <button
+            type="button"
+            onClick={() =>
+              setKonten((k) =>
+                k
+                  ? {
+                      ...k,
+                      peta_situs: { grup: [...k.peta_situs.grup, { title: "", items: [] }] },
+                    }
+                  : k
+              )
+            }
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-outline-variant font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-low"
+          >
+            <Plus aria-hidden="true" className="w-4 h-4" /> Tambah Grup
+          </button>
+        </div>
+        {konten.peta_situs.grup.map((g, gi) => (
+          <div key={gi} className="flex flex-col gap-2 border border-outline-variant/60 rounded-lg p-3">
+            <div className="flex items-center gap-2">
+              <input
+                value={g.title}
+                onChange={(e) =>
+                  setKonten((k) => {
+                    if (!k) return k;
+                    const grup = [...k.peta_situs.grup];
+                    grup[gi] = { ...grup[gi], title: e.target.value };
+                    return { ...k, peta_situs: { grup } };
+                  })
+                }
+                placeholder={`Judul grup ${gi + 1}`}
+                className="flex-1 min-w-0 px-3 py-2 bg-surface border border-outline-variant rounded-lg font-label-md text-label-md text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+              />
+              <button
+                type="button"
+                aria-label={`Hapus grup ${gi + 1}`}
+                onClick={() =>
+                  setKonten((k) =>
+                    k
+                      ? {
+                          ...k,
+                          peta_situs: {
+                            grup: k.peta_situs.grup.filter((_, j) => j !== gi),
+                          },
+                        }
+                      : k
+                  )
+                }
+                className="p-2 rounded-lg text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
+              >
+                <Trash2 aria-hidden="true" className="w-4 h-4" />
+              </button>
+            </div>
+            {g.items.map((it, ii) => (
+              <div key={ii} className="flex flex-col sm:flex-row gap-2">
+                <input
+                  value={it.label}
+                  onChange={(e) =>
+                    setKonten((k) => {
+                      if (!k) return k;
+                      const grup = [...k.peta_situs.grup];
+                      const items = [...grup[gi].items];
+                      items[ii] = { ...items[ii], label: e.target.value };
+                      grup[gi] = { ...grup[gi], items };
+                      return { ...k, peta_situs: { grup } };
+                    })
+                  }
+                  placeholder="Label tautan"
+                  className="flex-1 min-w-0 px-3 py-2 bg-surface border border-outline-variant rounded-lg font-body-sm text-body-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                />
+                <input
+                  value={it.href}
+                  onChange={(e) =>
+                    setKonten((k) => {
+                      if (!k) return k;
+                      const grup = [...k.peta_situs.grup];
+                      const items = [...grup[gi].items];
+                      items[ii] = { ...items[ii], href: e.target.value };
+                      grup[gi] = { ...grup[gi], items };
+                      return { ...k, peta_situs: { grup } };
+                    })
+                  }
+                  placeholder="/tujuan (mis. /peta)"
+                  className="flex-1 min-w-0 px-3 py-2 bg-surface border border-outline-variant rounded-lg font-code-sm text-code-sm text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                />
+                <button
+                  type="button"
+                  aria-label={`Hapus tautan ${it.label || ii + 1}`}
+                  onClick={() =>
+                    setKonten((k) => {
+                      if (!k) return k;
+                      const grup = [...k.peta_situs.grup];
+                      grup[gi] = {
+                        ...grup[gi],
+                        items: grup[gi].items.filter((_, j) => j !== ii),
+                      };
+                      return { ...k, peta_situs: { grup } };
+                    })
+                  }
+                  className="self-end sm:self-auto p-2 rounded-lg text-on-surface-variant hover:bg-error-container hover:text-on-error-container"
+                >
+                  <Trash2 aria-hidden="true" className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setKonten((k) => {
+                  if (!k) return k;
+                  const grup = [...k.peta_situs.grup];
+                  grup[gi] = {
+                    ...grup[gi],
+                    items: [...grup[gi].items, { label: "", href: "/" }],
+                  };
+                  return { ...k, peta_situs: { grup } };
+                })
+              }
+              className="self-start inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant font-label-sm text-label-sm text-on-surface-variant hover:bg-surface-container-low"
+            >
+              <Plus aria-hidden="true" className="w-3.5 h-3.5" /> Tambah Tautan
+            </button>
+          </div>
+        ))}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => simpan("peta_situs")}
+            disabled={simpanKey === "peta_situs"}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
+          >
+            {simpanKey === "peta_situs" ? (
+              <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save aria-hidden="true" className="w-4 h-4" />
+            )}
+            Simpan Peta Situs
+          </button>
+          {pesan && pesan.key === "peta_situs" && (
+            <span
+              role="status"
+              className={cn(
+                "font-label-sm text-label-sm",
+                pesan.ok ? "text-success" : "text-error"
+              )}
+            >
+              {pesan.text}
+            </span>
+          )}
+        </div>
+      </section>
+    </>
+  );
+}

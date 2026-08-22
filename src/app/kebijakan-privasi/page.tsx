@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
