@@ -2,12 +2,15 @@ import Link from "next/link";
 import { ShieldCheck } from "lucide-react";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
+import { getSiteContent } from "@/lib/site-content";
 
 export const metadata = {
   title: "Kebijakan Privasi",
 };
 
-export default function KebijakanPrivasiPage() {
+export default async function KebijakanPrivasiPage() {
+  const kebijakan = await getSiteContent("kebijakan_privasi");
+
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />
@@ -26,43 +29,14 @@ export default function KebijakanPrivasiPage() {
         </div>
 
         <div className="space-y-6 text-on-surface-variant font-body-md text-body-md leading-relaxed">
-          <section>
-            <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">1. Data yang Dikumpulkan</h2>
-            <p>
-              Sistem Informasi Kelurahan Tiro Sompe (SiTSOMP) mengumpulkan data pribadi yang Anda
-              berikan saat mendaftar dan mengajukan layanan, antara lain NIK, nama lengkap, nomor
-              telepon, dan data pendukung lainnya yang diperlukan untuk pemrosesan surat.
-            </p>
-          </section>
-          <section>
-            <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">2. Penggunaan Data</h2>
-            <p>
-              Data digunakan untuk memverifikasi identitas, memproses permohonan surat, memberikan
-              notifikasi, dan meningkatkan layanan administrasi kelurahan. Data tidak akan
-              diperjualbelikan atau digunakan di luar kepentingan pelayanan publik.
-            </p>
-          </section>
-          <section>
-            <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">3. Keamanan</h2>
-            <p>
-              Kami menerapkan langkah keamanan teknis dan organisasi yang wajar, termasuk enkripsi
-              saat transmisi data, untuk melindungi informasi Anda dari akses yang tidak sah.
-            </p>
-          </section>
-          <section>
-            <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">4. Hak Anda</h2>
-            <p>
-              Anda berhak mengakses, memperbaiki, atau menghapus data pribadi Anda dengan menghubungi
-              kantor kelurahan melalui halaman <Link href="/kontak" className="text-primary hover:underline">Kontak Kami</Link>.
-            </p>
-          </section>
-          <section>
-            <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">5. Perubahan Kebijakan</h2>
-            <p>
-              Kebijakan ini dapat diperbarui sewaktu-waktu. Perubahan akan diumumkan melalui halaman
-              pengumuman resmi kelurahan.
-            </p>
-          </section>
+          {kebijakan.bagian.map((b, i) => (
+            <section key={b.judul}>
+              <h2 className="font-headline-sm text-headline-sm text-on-surface font-semibold mb-2">
+                {i + 1}. {b.judul}
+              </h2>
+              <p>{b.isi}</p>
+            </section>
+          ))}
         </div>
       </main>
 

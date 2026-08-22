@@ -1,44 +1,22 @@
 import { Building2, Clock, Mail, MapPin, Phone } from "lucide-react";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
+import { getSiteContent } from "@/lib/site-content";
 
 export const metadata = {
   title: "Kontak Kami",
 };
 
-const CONTACTS = [
-  {
-    icon: MapPin,
-    title: "Alamat",
-    lines: [
-      "Kantor Kelurahan Tiro Sompe",
-      "Jl. Poros Parepare, Kel. Tiro Sompe",
-      "Kec. Bacukiki Barat, Kota Parepare",
-      "Sulawesi Selatan",
-    ],
-  },
-  {
-    icon: Phone,
-    title: "Telepon",
-    lines: ["(0421) 2XXXXX", "WhatsApp: 0812-3456-7890"],
-  },
-  {
-    icon: Mail,
-    title: "Email",
-    lines: ["kel.tirosompe@pareparekota.go.id"],
-  },
-  {
-    icon: Clock,
-    title: "Jam Layanan",
-    lines: [
-      "Senin – Kamis: 08.00 – 15.00 WITA",
-      "Jumat: 08.00 – 11.00 WITA",
-      "Sabtu – Minggu: Tutup",
-    ],
-  },
-];
+export default async function KontakPage() {
+  const kontak = await getSiteContent("kontak");
 
-export default function KontakPage() {
+  const CONTACTS = [
+    { icon: MapPin, title: "Alamat", lines: kontak.alamat },
+    { icon: Phone, title: "Telepon", lines: kontak.telepon },
+    { icon: Mail, title: "Email", lines: kontak.email },
+    { icon: Clock, title: "Jam Layanan", lines: kontak.jam_layanan },
+  ];
+
   return (
     <div className="bg-background text-on-background font-body-md min-h-screen flex flex-col">
       <AppHeader />

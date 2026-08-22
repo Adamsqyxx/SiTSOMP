@@ -370,3 +370,15 @@ model Lokasi {
   @@index([jenis])
   @@map("lokasi")
 }
+
+// Konten halaman statis yang bisa diedit admin dari dashboard
+// (kontak, kebijakan privasi, peta situs). Key-value: satu baris per
+// bagian; `data` berisi JSON sesuai bentuk konten tiap key.
+model SiteContent {
+  key        String   @id
+  data       String
+  updated_at DateTime @updatedAt
+  updated_by String?
+
+  @@map("site_content")
+}
