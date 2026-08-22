@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import AppSidebar from "@/components/app-sidebar";
 import BackButton from "@/components/back-button";
 
@@ -53,45 +51,10 @@ const FALLBACK_FIELDS: FormField[] = [
   { id: "keterangan", label: "Keterangan", required: false, placeholder: "Opsional" },
 ];
 
-function SidebarContent() {
-  return (
-    <>
-      <div className="flex items-center gap-4 px-4 py-4 mb-4">
-        <div className="w-12 h-12 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant flex-shrink-0 flex items-center justify-center font-label-md font-bold text-on-surface">
-          AK
-        </div>
-        <div>
-          <h2 className="font-headline-sm text-headline-sm font-bold text-primary">Admin Kelurahan</h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">Tiro Sompe</p>
-          <span className="font-label-sm text-label-sm text-outline">v1.0.2</span>
-        </div>
-      </div>
-      <nav className="flex flex-col gap-1">
-        {SIDEBAR_ITEMS.map((item) => (
-          <Link
-            key={item.label}
-            href={item.href}
-            className={cn(
-              "flex items-center gap-3 px-4 py-3 mx-2 rounded-full font-body-md text-body-md transition-all duration-200",
-              item.active
-                ? "bg-primary-container text-on-primary-container"
-                : "text-on-surface-variant hover:bg-surface-container-high"
-            )}
-          >
-            <item.icon aria-hidden="true" className="w-5 h-5" />
-            {item.label}
-          </Link>
-        ))}
-      </nav>
-    </>
-  );
-}
-
 export default function PengajuanPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [values, setValues] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -178,78 +141,12 @@ export default function PengajuanPage() {
   }
 
   return (
-    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
-      {/* TopAppBar */}
-      <header className="bg-surface text-primary border-b border-outline-variant transition-colors duration-200 fixed top-0 w-full z-50 flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop">
-        <div className="flex items-center gap-4">
-          <button
-            type="button"
-            aria-label="Menu"
-            onClick={() => setDrawerOpen(true)}
-            className="md:hidden hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center text-on-surface-variant"
-          >
-            <Menu aria-hidden="true" className="w-5 h-5" />
-          </button>
-          <BackButton
-            fallbackHref="/layanan/surat"
-            label=""
-            className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-          />
-          <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">SiTSOMP</Link>
-        </div>
-
-        <nav className="hidden md:flex items-center gap-2">
-          {DESKTOP_NAV.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2 rounded-full font-label-md text-label-md transition-colors duration-200",
-                item.active
-                  ? "bg-secondary-container text-on-secondary-container"
-                  : "text-on-surface-variant hover:bg-surface-container-low"
-              )}
-            >
-              <item.icon aria-hidden="true" className="w-5 h-5" />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-2 md:gap-3">
-          <button
-            type="button"
-            aria-label="Notifikasi"
-            onClick={() => router.push("/pengumuman")}
-            className="hover:bg-surface-container-low p-2 rounded-full transition-colors flex items-center justify-center text-on-surface-variant"
-            title="Lihat pengumuman"
-          >
-            <Bell aria-hidden="true" className="w-5 h-5" />
-          </button>
-        </div>
-      </header>
-
-      {/* Mobile drawer */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setDrawerOpen(false)} aria-hidden="true" />
-          <nav className="absolute left-0 top-0 h-full w-[280px] bg-surface flex flex-col pt-4 shadow-xl">
-            <button
-              type="button"
-              aria-label="Tutup menu"
-              onClick={() => setDrawerOpen(false)}
-              className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low z-10"
-            >
-              <X aria-hidden="true" className="w-5 h-5" />
-            </button>
-            <SidebarContent />
-          </nav>
-        </div>
-      )}
+    <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased md:pl-64">
+      <AppSidebar />
 
       <main className="flex-1 pt-16 w-full max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop py-8">
         <div className="mb-8">
-          <BackButton fallbackHref="/layanan/surat" className="mb-3 -ml-1" />
+          <BackButton fallbackHref="/layanan/surat" className="mb-3 -ml-1 md:hidden" />
           <span className="inline-block px-3 py-1 bg-primary-container/30 text-primary font-label-sm text-label-sm rounded-full mb-3 uppercase tracking-wide">
             {(key || "surat").toUpperCase()}
           </span>

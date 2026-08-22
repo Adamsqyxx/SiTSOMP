@@ -341,7 +341,6 @@ export default function AdminPage() {
           <div className="flex items-center gap-3">
             <BackButton
               className="text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
-              label=""
             />
             <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">
               SiTSOMP

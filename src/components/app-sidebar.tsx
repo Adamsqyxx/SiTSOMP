@@ -19,11 +19,11 @@ import BackButton from "@/components/back-button";
 
 const NAV = [
   { label: "Beranda", href: "/", icon: Home, exact: true },
-  { label: "Layanan", href: "/layanan/surat", icon: FileText },
-  { label: "Peta", href: "/peta", icon: Map },
-  { label: "Pengumuman", href: "/pengumuman", icon: Megaphone },
-  { label: "Profil", href: "/profil", icon: User },
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { label: "Layanan", href: "/layanan/surat", icon: FileText, exact: false },
+  { label: "Peta", href: "/peta", icon: Map, exact: false },
+  { label: "Pengumuman", href: "/pengumuman", icon: Megaphone, exact: false },
+  { label: "Profil", href: "/profil", icon: User, exact: false },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: false },
 ] as const;
 
 export default function AppSidebar() {

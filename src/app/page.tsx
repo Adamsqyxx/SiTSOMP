@@ -41,7 +41,6 @@ export default function BerandaPage() {
             </button>
             <BackButton
               fallbackHref="/"
-              label=""
               className="hidden md:inline-flex text-on-surface-variant hover:bg-surface-container-low rounded-full p-2"
             />
             <Link href="/" className="font-headline-md text-headline-md font-bold text-primary">

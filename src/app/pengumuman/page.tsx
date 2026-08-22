@@ -1,7 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import AppSidebar from "@/components/app-sidebar";
+import BackButton from "@/components/back-button";
 
 const POSTS = [
   {

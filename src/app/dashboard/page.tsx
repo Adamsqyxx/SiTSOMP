@@ -13,8 +13,6 @@ import { cn } from "@/lib/utils";
 import AppSidebar from "@/components/app-sidebar";
 import BackButton from "@/components/back-button";
 
-const ADMIN_ROLES = ["super_admin", "lurah", "sekretaris", "petugas"] as const;
-
 interface Riwayat {
   id: string;
   nomor_permohonan: string;
