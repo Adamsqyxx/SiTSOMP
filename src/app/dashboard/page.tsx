@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
+
+const ADMIN_ROLES = ["super_admin", "lurah", "sekretaris", "petugas"] as const;
 
 const DESKTOP_NAV = [
   { label: "Beranda", href: "/", active: false },

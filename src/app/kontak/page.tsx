@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Building2, Clock, Mail, MapPin, Phone, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
 
 export const metadata = {
   title: "Kontak Kami",

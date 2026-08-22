@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FileText, Home, LayoutDashboard, Map, MapPin, Megaphone, Settings, User, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AuthButtons from "@/components/auth-buttons";
+import BackButton from "@/components/back-button";
 
 export const metadata = {
   title: "Peta Situs",
