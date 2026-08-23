@@ -7,8 +7,17 @@ import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 import { getServiceBySlug, type SuratService } from "@/lib/surat-config";
 import { uploadLampiran, type LampiranUpload } from "@/lib/lampiran";
+import PemilihWilayah, { type WilayahSelection } from "@/components/pemilih-wilayah";
 import { Toaster, toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const WILAYAH_KOSONG: WilayahSelection = {
+  kota: "Kota Parepare",
+  kecamatan: "Kecamatan Bacukiki Barat",
+  kelurahan: "Kelurahan Tiro Sompe",
+  rw: "",
+  rt: "",
+};
 
 interface MeResponse {
   user?: {
@@ -34,6 +43,7 @@ export default function PengajuanPage() {
   const [slug, setSlug] = useState<string>("");
   const [jenis, setJenis] = useState<string>("");
   const [lampiranDitandai, setLampiranDitandai] = useState<Set<string>>(new Set());
+  const [wilayahByField, setWilayahByField] = useState<Record<string, WilayahSelection>>({});
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Next 15+: useParams/useSearchParams adalah Promise — baca lewat useEffect.
@@ -137,7 +147,13 @@ export default function PengajuanPage() {
 
       // Field required generik yang masih kosong.
       for (const f of service.fields) {
-        if (f.required && !(values[f.id] ?? "").trim()) {
+        if (!f.required) continue;
+        if (f.wilayah) {
+          const w = wilayahByField[f.id];
+          if (!w?.rw || !w?.rt) {
+            errs.push(`${f.label}: pilih RW dan RT.`);
+          }
+        } else if (!(values[f.id] ?? "").trim()) {
           errs.push(`${f.label} wajib diisi.`);
         }
       }
@@ -279,16 +295,34 @@ export default function PengajuanPage() {
                   {f.label}
                   {f.required && <span className="text-danger"> *</span>}
                 </label>
-                <textarea
-                  id={f.id}
-                  name={f.id}
-                  required={f.required}
-                  rows={2}
-                  placeholder={f.placeholder}
-                  value={values[f.id] ?? ""}
-                  onChange={(e) => setField(f.id, e.target.value)}
-                  className="block w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none resize-y"
-                />
+                {f.wilayah ? (
+                  <PemilihWilayah
+                    value={wilayahByField[f.id] ?? WILAYAH_KOSONG}
+                    onChange={(v) =>
+                      setWilayahByField((prev) => {
+                        const next = { ...prev, [f.id]: v };
+                        // Simpan juga ringkasan alamat ke values agar ikut tersubmit.
+                        const alamat =
+                          v.rt && v.rw
+                            ? `RT ${v.rt} / RW ${v.rw}, Kelurahan Tiro Sompe, Kecamatan Bacukiki Barat, Kota Parepare`
+                            : "";
+                        setValues((pv) => ({ ...pv, [f.id]: alamat }));
+                        return next;
+                      })
+                    }
+                  />
+                ) : (
+                  <textarea
+                    id={f.id}
+                    name={f.id}
+                    required={f.required}
+                    rows={2}
+                    placeholder={f.placeholder}
+                    value={values[f.id] ?? ""}
+                    onChange={(e) => setField(f.id, e.target.value)}
+                    className="block w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none resize-y"
+                  />
+                )}
               </div>
             ))}
 

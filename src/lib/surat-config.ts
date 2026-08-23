@@ -20,6 +20,8 @@ export interface SuratField {
   label: string;
   required: boolean;
   placeholder?: string;
+  /** Render field sebagai pemilih wilayah berantai (Kota→Kec→Kel→RW→RT) Tiro Sompe. */
+  wilayah?: boolean;
 }
 
 export interface SuratService {
@@ -49,7 +51,7 @@ export const SERVICES: SuratService[] = [
     fields: [
       { id: "nama_lengkap", label: "Nama Lengkap (sesuai KTP)", required: true, placeholder: "Nama sesuai KTP" },
       { id: "nik", label: "NIK", required: true, placeholder: "16 digit NIK" },
-      { id: "alamat", label: "Alamat Domisili", required: true, placeholder: "Alamat lengkap" },
+      { id: "alamat", label: "Alamat Domisili (Wilayah Tiro Sompe)", required: true, placeholder: "Alamat lengkap", wilayah: true },
       { id: "keperluan", label: "Keperluan Surat", required: true, placeholder: "Misal: keringanan biaya sekolah" },
       { id: "keterangan", label: "Keterangan Tambahan", required: false, placeholder: "Opsional" },
     ],
@@ -70,7 +72,7 @@ export const SERVICES: SuratService[] = [
       { id: "nama_lengkap", label: "Nama Lengkap (sesuai KTP)", required: true, placeholder: "Nama sesuai KTP" },
       { id: "nik", label: "NIK", required: true, placeholder: "16 digit NIK" },
       { id: "nama_usaha", label: "Nama Usaha", required: true, placeholder: "Nama usaha Anda" },
-      { id: "alamat_usaha", label: "Alamat Usaha", required: true, placeholder: "Alamat lokasi usaha" },
+      { id: "alamat_usaha", label: "Alamat Usaha (Wilayah Tiro Sompe)", required: true, placeholder: "Alamat lokasi usaha", wilayah: true },
       { id: "keterangan", label: "Keterangan Tambahan", required: false, placeholder: "Opsional" },
     ],
   },
@@ -90,7 +92,7 @@ export const SERVICES: SuratService[] = [
       { id: "nama_lengkap", label: "Nama Lengkap (sesuai KTP)", required: true, placeholder: "Nama sesuai KTP" },
       { id: "nik", label: "NIK", required: true, placeholder: "16 digit NIK" },
       { id: "alamat_asal", label: "Alamat Asal", required: true, placeholder: "Alamat KTP asal" },
-      { id: "alamat_domisili", label: "Alamat Domisili Sekarang", required: true, placeholder: "Alamat tinggal saat ini" },
+      { id: "alamat_domisili", label: "Alamat Domisili Sekarang (Wilayah Tiro Sompe)", required: true, placeholder: "Alamat tinggal saat ini", wilayah: true },
       { id: "keterangan", label: "Keterangan Tambahan", required: false, placeholder: "Opsional" },
     ],
   },
