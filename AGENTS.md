@@ -87,10 +87,10 @@ AUTH_SECRET="..."                          # .env.local — NextAuth JWT secret 
 ## Auth & Protected Routes
 
 - Auth: **NextAuth (Auth.js) v5 beta** — `src/auth.ts` (Credentials Provider + JWT session), route handler di `src/app/api/auth/[...nextauth]/route.ts`, secret `AUTH_SECRET`.
-- Credentials: NIK (16 digit → email sintetis `<NIK>@sitsomp.id`) atau email + password. Password di-hash `bcryptjs` di tabel `users.password_hash`.
+- Credentials: identifier bisa **NIK (16 digit), email, atau nomor HP** + password. Password di-hash `bcryptjs` di tabel `users.password_hash`. Akun lama (email sintetis `<NIK>@sitsomp.id`) tetap login via NIK-nya.
 - Route API custom (tetap dipakai client): `/api/auth/me` (session), `/api/auth/login`, `/api/auth/logout`, `/api/auth/register` (buat user + hash).
 - Middleware (`src/middleware.ts`) proteksi via `auth()`: `/dashboard`, `/peta`, `/layanan` tanpa session → redirect `/login?next=...`. Sudah login → `/login`/`/register` dialihkan ke `/dashboard`.
-- Registrasi memakai **email sintetis `<NIK>@sitsomp.id`** (form register tidak punya field email) — login pakai NIK tersebut sebagai identifier.
+- Registrasi: NIK wajib, **email opsional** (nullable + unique), No HP unique. Login bisa NIK/email/No HP — lihat `authorize()` di `src/auth.ts`.
 - `/profil` publik (tanpa proteksi); ambil data user dari `/api/auth/me`.
 
 ## Pitfalls
