@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { getServiceBySlug } from "@/lib/surat-config";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -38,6 +39,31 @@ export async function POST(req: Request) {
         { error: "Format lampiran tidak valid." },
         { status: 400 }
       );
+    }
+
+    // Semua persyaratan wajib diunggah: jumlah lampiran harus sama dengan
+    // jumlah persyaratan layanan yang diminta.
+    const service = getServiceBySlug(kode);
+    if (service) {
+      const daftarLampiran = lampiranValid
+        ? (lampiran as { label?: unknown }[])
+        : [];
+      const kurang = service.requirements.filter(
+        (req) =>
+          !daftarLampiran.some(
+            (l) => typeof l.label === "string" && l.label === req.label
+          )
+      );
+      if (kurang.length > 0) {
+        return NextResponse.json(
+          {
+            error: `Lampiran wajib belum lengkap: ${kurang
+              .map((r) => r.label)
+              .join(", ")}.`,
+          },
+          { status: 400 }
+        );
+      }
     }
 
     const session = await auth();

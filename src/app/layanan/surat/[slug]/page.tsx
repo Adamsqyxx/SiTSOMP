@@ -7,6 +7,8 @@ import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
 import { getServiceBySlug, type SuratService } from "@/lib/surat-config";
 import { uploadLampiran, type LampiranUpload } from "@/lib/lampiran";
+import { Toaster, toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface MeResponse {
   user?: {
@@ -28,6 +30,7 @@ export default function PengajuanPage() {
   const [done, setDone] = useState(false);
   const [slug, setSlug] = useState<string>("");
   const [jenis, setJenis] = useState<string>("");
+  const [lampiranDitandai, setLampiranDitandai] = useState<Set<string>>(new Set());
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Next 15+: useParams/useSearchParams adalah Promise — baca lewat useEffect.
@@ -97,8 +100,22 @@ export default function PengajuanPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitting(true);
     setError(null);
+
+    // Semua lampiran persyaratan wajib diunggah.
+    if (service) {
+      const kurang = service.requirements.filter((req) => !files[req.label]);
+      if (kurang.length > 0) {
+        setLampiranDitandai(new Set(kurang.map((r) => r.label)));
+        toast.error(
+          `Lampiran wajib diunggah: ${kurang.map((r) => r.label).join(", ")}`
+        );
+        return;
+      }
+      setLampiranDitandai(new Set());
+    }
+
+    setSubmitting(true);
     try {
       if (!service) {
         setError("Jenis surat tidak dikenali.");
@@ -172,6 +189,7 @@ export default function PengajuanPage() {
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
+      <Toaster position="top-center" richColors />
       <AppHeader />
 
       <main className="flex-1 pt-20 lg:pt-8 lg:pl-16 w-full max-w-2xl mx-auto px-margin-mobile md:px-margin-desktop pb-16">
@@ -236,8 +254,15 @@ export default function PengajuanPage() {
                 const isImage = file?.type.startsWith("image/");
                 return (
                   <div key={req.label} className="space-y-2">
-                    <label className="block font-label-sm text-label-sm text-on-surface-variant">
-                      {req.label}
+                    <label
+                      className={cn(
+                        "block font-label-sm text-label-sm",
+                        lampiranDitandai.has(req.label)
+                          ? "text-danger"
+                          : "text-on-surface-variant"
+                      )}
+                    >
+                      {req.label} <span className="text-danger">*</span>
                     </label>
                     {preview ? (
                       <div className="flex items-start gap-3 bg-surface border border-outline-variant rounded-lg p-3">
@@ -267,10 +292,17 @@ export default function PengajuanPage() {
                         </div>
                       </div>
                     ) : (
-                      <label className="flex items-center gap-2 cursor-pointer bg-surface border border-dashed border-outline-variant rounded-lg px-4 py-3 hover:border-primary transition-colors">
-                        <Upload className="w-4 h-4 text-outline" />
+                      <label
+                        className={cn(
+                          "flex items-center gap-2 cursor-pointer bg-surface border border-dashed rounded-lg px-4 py-3 transition-colors",
+                          lampiranDitandai.has(req.label)
+                            ? "border-danger"
+                            : "border-outline-variant hover:border-primary"
+                        )}
+                      >
+                        <Upload className={cn("w-4 h-4", lampiranDitandai.has(req.label) ? "text-danger" : "text-outline")} />
                         <span className="font-body-sm text-body-sm text-on-surface-variant">
-                          Pilih foto/scan (JPG, PNG, WEBP, PDF, maks 5 MB)
+                          Wajib — pilih foto/scan (JPG, PNG, WEBP, PDF, maks 5 MB)
                         </span>
                         <input
                           ref={(el) => {
