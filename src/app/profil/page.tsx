@@ -22,6 +22,15 @@ interface ProfileUser {
   role?: string | null;
 }
 
+// Label peran sesuai enum UserRole di Prisma.
+const ROLE_LABELS: Record<string, string> = {
+  super_admin: "Super Admin",
+  lurah: "Lurah",
+  sekretaris: "Sekretaris",
+  petugas: "Petugas Kelurahan",
+  warga: "Warga",
+};
+
 export default function ProfilPage() {
   const router = useRouter();
   const [user, setUser] = useState<ProfileUser | null>(null);
@@ -117,7 +126,7 @@ export default function ProfilPage() {
                 </div>
                 <span className="ml-auto inline-flex items-center gap-1.5 bg-primary-container/40 text-on-primary-container font-label-sm text-label-sm px-3 py-1 rounded-full">
                   <BadgeCheck aria-hidden="true" className="w-4 h-4" />
-                  {user.role === "admin" ? "Admin Kelurahan" : "Warga"}
+                  {ROLE_LABELS[user.role ?? "warga"] ?? "Warga"}
                 </span>
               </div>
 
@@ -141,7 +150,7 @@ export default function ProfilPage() {
                     <ShieldCheck aria-hidden="true" className="w-4 h-4" /> Peran
                   </dt>
                   <dd className="font-body-md text-body-md text-on-surface">
-                    {user.role === "admin" ? "Admin Kelurahan" : "Warga"}
+                    {ROLE_LABELS[user.role ?? "warga"] ?? "Warga"}
                   </dd>
                 </div>
               </dl>
