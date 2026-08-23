@@ -80,6 +80,25 @@ export async function POST(req: Request) {
 
     const { kategori, judul, deskripsi, latitude, longitude } = parsed.data;
 
+    // Koordinat wajib berada di dalam batas Kel. Tiro Sompe (PostGIS).
+    if (latitude != null && longitude != null) {
+      const dalam = await prisma.$queryRaw<{ dalam: boolean }[]>`
+        SELECT ST_Contains(
+          b.geom,
+          ST_SetSRID(ST_MakePoint(${longitude}::double precision, ${latitude}::double precision), 4326)
+        ) AS dalam
+        FROM lokasi b
+        WHERE b.geom IS NOT NULL AND b.jenis = 'batas_kelurahan'::"JenisLokasi"
+        LIMIT 1
+      `;
+      if (dalam[0] && dalam[0].dalam === false) {
+        return NextResponse.json(
+          { error: "Lokasi kejadian di luar batas Kelurahan Tiro Sompe." },
+          { status: 422 }
+        );
+      }
+    }
+
     // Nomor tiket unik: PGN-yyyymmdd-XXXX (XXXX = 4 digit acak).
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
     const rand = Math.floor(1000 + Math.random() * 9000);

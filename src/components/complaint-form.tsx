@@ -1,12 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import dynamicImport from "next/dynamic";
 import { toast } from "sonner";
 import { MapPin, Send } from "lucide-react";
-import { cn } from "@/lib/utils";
+
+const PilihLokasiPeta = dynamicImport(
+  () => import("@/components/map/pilih-lokasi-peta"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[280px] md:h-[320px] rounded-lg border border-outline-variant bg-surface-container-low flex items-center justify-center">
+        <p className="font-body-sm text-body-sm text-on-surface-variant">Memuat peta…</p>
+      </div>
+    ),
+  }
+);
 
 const complaintSchema = z.object({
   kategori: z.enum(["infrastruktur", "sosial", "keamanan", "administrasi", "lainnya"]),
@@ -28,10 +40,29 @@ const KATEGORI_LABEL: Record<ComplaintFormValues["kategori"], string> = {
   lainnya: "Lainnya",
 };
 
+interface WilayahResponse {
+  id: string;
+  nomor_rw: string;
+  rt_list: { id: string; nomor_rt: string }[];
+}
+
+// Pusat perkiraan tiap RT tidak tersedia di DB — dropdown hanya menandai
+// wilayah administratif; koordinat tetap dari klik pin di peta.
 export default function ComplaintForm({ onSubmitted }: { onSubmitted?: () => void }) {
   const [submitting, setSubmitting] = useState(false);
-  const [lokasiAktif, setLokasiAktif] = useState(false);
   const [koordinat, setKoordinat] = useState<{ lat: number; lng: number } | null>(null);
+  const [wilayah, setWilayah] = useState<WilayahResponse[]>([]);
+  const [pilihanRw, setPilihanRw] = useState("");
+  const [pilihanRt, setPilihanRt] = useState("");
+
+  useEffect(() => {
+    fetch("/api/wilayah")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => setWilayah(d?.data ?? []))
+      .catch(() => {});
+  }, []);
+
+  const rtTersedia = wilayah.find((w) => w.nomor_rw === pilihanRw)?.rt_list ?? [];
 
   const {
     register,
@@ -49,6 +80,10 @@ export default function ComplaintForm({ onSubmitted }: { onSubmitted?: () => voi
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    if (!koordinat) {
+      toast.error("Pilih titik lokasi kejadian pada peta terlebih dahulu.");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/pengaduan", {
@@ -56,8 +91,10 @@ export default function ComplaintForm({ onSubmitted }: { onSubmitted?: () => voi
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          latitude: koordinat?.lat ?? null,
-          longitude: koordinat?.lng ?? null,
+          latitude: koordinat.lat,
+          longitude: koordinat.lng,
+          ...(pilihanRw ? { rw: pilihanRw } : {}),
+          ...(pilihanRt ? { rt: pilihanRt } : {}),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -69,8 +106,9 @@ export default function ComplaintForm({ onSubmitted }: { onSubmitted?: () => voi
         description: `Nomor tiket: ${data.data?.nomor_tiket ?? "-"}. Status akan dipantau oleh kelurahan.`,
       });
       reset();
-      setLokasiAktif(false);
       setKoordinat(null);
+      setPilihanRw("");
+      setPilihanRt("");
       onSubmitted?.();
     } catch {
       toast.error("Terjadi kesalahan koneksi. Coba lagi.");
@@ -136,54 +174,64 @@ export default function ComplaintForm({ onSubmitted }: { onSubmitted?: () => voi
         )}
       </div>
 
-      {/* Titik lokasi (opsional) */}
-      <div>
-        <button
-          type="button"
-          onClick={() => setLokasiAktif((v) => !v)}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-full border font-label-md text-label-md transition-colors",
-            lokasiAktif
-              ? "bg-primary-container text-on-primary-container border-primary"
-              : "border-outline-variant text-on-surface-variant hover:bg-surface-container-low"
+      {/* Lokasi kejadian — peta + dropdown RT/RW, khusus Kel. Tiro Sompe */}
+      <div className="space-y-3">
+        <label className="font-label-md text-label-md text-on-surface flex items-center gap-2">
+          <MapPin aria-hidden="true" className="w-4 h-4 text-primary" />
+          Titik Lokasi Kejadian <span className="text-danger">*</span>
+        </label>
+
+        {/* Dropdown RW/RT sebagai bantuan penanda wilayah */}
+        <div className="grid grid-cols-2 gap-3">
+          <select
+            value={pilihanRw}
+            onChange={(e) => {
+              setPilihanRw(e.target.value);
+              setPilihanRt("");
+            }}
+            aria-label="Pilih RW"
+            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2.5 font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="">RW (opsional)</option>
+            {wilayah.map((w) => (
+              <option key={w.id} value={w.nomor_rw}>
+                RW {w.nomor_rw}
+              </option>
+            ))}
+          </select>
+          <select
+            value={pilihanRt}
+            onChange={(e) => setPilihanRt(e.target.value)}
+            aria-label="Pilih RT"
+            disabled={!pilihanRw}
+            className="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2.5 font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
+          >
+            <option value="">RT (opsional)</option>
+            {rtTersedia.map((rt) => (
+              <option key={rt.id} value={rt.nomor_rt}>
+                RT {rt.nomor_rt}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <PilihLokasiPeta
+          value={koordinat}
+          onChange={setKoordinat}
+          onLuarBatas={() =>
+            toast.error("Lokasi di luar batas Kelurahan Tiro Sompe. Klik di dalam area yang disorot.")
+          }
+        />
+
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          Klik langsung pada peta untuk menaruh pin lokasi kejadian. Area biru adalah
+          batas Kelurahan Tiro Sompe — lokasi di luarnya tidak dapat dipilih.
+          {koordinat && (
+            <span className="block mt-1 font-code-sm text-code-sm text-outline">
+              Pin: {koordinat.lat.toFixed(6)}, {koordinat.lng.toFixed(6)}
+            </span>
           )}
-        >
-          <MapPin aria-hidden="true" className="w-4 h-4" />
-          {lokasiAktif ? "Titik lokasi aktif" : "Tambahkan titik lokasi (opsional)"}
-        </button>
-        {lokasiAktif && (
-          <p className="font-body-sm text-body-sm text-on-surface-variant mt-2">
-            Gunakan peta wilayah di halaman{" "}
-            <a href="/peta" className="text-primary underline" onClick={() => setLokasiAktif(false)}>
-              Peta
-            </a>{" "}
-            untuk memilih titik, lalu salin koordinat di sini:
-          </p>
-        )}
-        {lokasiAktif && (
-          <div className="flex gap-2 mt-2">
-            <input
-              type="number"
-              step="any"
-              placeholder="Latitude (mis. -4.0250)"
-              value={koordinat?.lat ?? ""}
-              onChange={(e) =>
-                setKoordinat((k) => ({ lat: Number(e.target.value), lng: k?.lng ?? 0 }))
-              }
-              className="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-            <input
-              type="number"
-              step="any"
-              placeholder="Longitude (mis. 119.6291)"
-              value={koordinat?.lng ?? ""}
-              onChange={(e) =>
-                setKoordinat((k) => ({ lat: k?.lat ?? 0, lng: Number(e.target.value) }))
-              }
-              className="flex-1 bg-surface-container-lowest border border-outline-variant rounded-lg px-3 py-2 font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        )}
+        </p>
       </div>
 
       <button

@@ -86,7 +86,10 @@ export async function POST(req: Request) {
         formData: data as Record<string, unknown>,
       });
       if (!hasil.ok) {
-        return NextResponse.json({ error: hasil.errors.join(" ") }, { status: 422 });
+        return NextResponse.json(
+          { error: "Data yang Anda masukkan tidak sesuai." },
+          { status: 422 }
+        );
       }
     }
 

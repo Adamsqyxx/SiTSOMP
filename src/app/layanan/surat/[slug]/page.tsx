@@ -122,18 +122,14 @@ export default function PengajuanPage() {
       if (!nama || nama.length < 3) {
         errs.push("Nama lengkap wajib diisi sesuai KTP.");
       } else if (namaResmi.size > 0 && !namaResmi.has(nama.toLowerCase().replace(/\s+/g, " "))) {
-        errs.push(
-          `Nama tidak sesuai data resmi. Gunakan nama lengkap sesuai KTP: "${akun?.nama_lengkap}".`
-        );
+        errs.push("Nama tidak sesuai data resmi.");
       }
 
       if (nik) {
         if (!/^\d{16}$/.test(nik)) {
           errs.push("NIK harus tepat 16 digit angka.");
         } else if (akun?.nik && nik !== akun.nik) {
-          errs.push(
-            `NIK yang Anda isi tidak cocok dengan NIK akun Anda (${akun.nik.slice(0, 4)}****).`
-          );
+          errs.push("NIK tidak sesuai data resmi.");
         }
       } else if (values.nik !== undefined) {
         errs.push("NIK wajib diisi 16 digit.");
@@ -147,8 +143,8 @@ export default function PengajuanPage() {
       }
 
       if (errs.length > 0) {
-        toast.error(errs.join(" "));
-        setError(errs.join(" "));
+        toast.error("Data yang Anda masukkan tidak sesuai.");
+        setError("Data yang Anda masukkan tidak sesuai.");
         return;
       }
     }
