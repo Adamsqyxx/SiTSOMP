@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
-import { toast } from "sonner";
+import { Toaster, toast } from "sonner";
 
 export default function PengaturanPage() {
   const router = useRouter();
@@ -52,6 +52,11 @@ export default function PengaturanPage() {
 
       if (!res.ok) throw new Error("Gagal menyimpan");
 
+      const updatedData = await res.json();
+      if (updatedData.user) {
+        setUser((prev) => ({ ...prev, ...updatedData.user }));
+      }
+
       toast.success("Profil berhasil diperbarui");
       router.refresh();
     } catch (err) {
@@ -76,6 +81,7 @@ export default function PengaturanPage() {
 
       {/* Content */}
       <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 px-margin-mobile md:px-margin-desktop bg-background">
+        <Toaster position="top-center" richColors />
         <div className="max-w-max-width mx-auto flex flex-col gap-6">
           <div>
               <BackButton fallbackHref="/profil" className="mb-3 -ml-1" />
