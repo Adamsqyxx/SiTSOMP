@@ -401,7 +401,7 @@ export default function DashboardPage() {
           {/* Footer */}
           <footer className="relative w-full mt-8 md:mt-12 border-t border-outline-variant py-6 md:py-8 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 bg-surface-container-lowest rounded-xl px-4 sm:px-0">
             <div className="font-body-sm text-body-sm text-on-surface-variant">
-              © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
+              © 2026 KKN ITH 03 Tiro Sompe. Seluruh Hak Cipta Dilindungi.
             </div>
             <div className="flex gap-x-4 gap-y-2 flex-wrap md:justify-end font-body-sm text-body-sm text-on-surface-variant">
               <span className="hover:text-primary underline transition-opacity duration-150">Kontak Kami</span>

@@ -111,7 +111,7 @@ export default function NotFound() {
       <footer className="bg-surface-container-lowest w-full mt-auto border-t border-outline-variant">
         <div className="py-8 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto">
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta
+            © 2026 KKN ITH 03 Tiro Sompe. Seluruh Hak Cipta
             Dilindungi.
           </p>
         </div>

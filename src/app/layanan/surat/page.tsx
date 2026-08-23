@@ -144,7 +144,7 @@ export default function LayananSuratPage() {
       {/* Footer */}
       <footer className="bg-surface-container-lowest text-primary font-body-sm text-body-sm border-t border-outline-variant transition-opacity duration-150 relative w-full mt-auto py-8 px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-4 max-w-max-width mx-auto">
         <div className="font-label-md text-label-md font-bold text-on-surface">
-          © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
+          © 2026 KKN ITH 03 Tiro Sompe. Seluruh Hak Cipta Dilindungi.
         </div>
         <div className="flex flex-wrap gap-4 md:justify-end text-on-surface-variant">
           <Link className="hover:text-primary underline transition-opacity duration-150" href="/kontak">

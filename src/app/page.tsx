@@ -157,7 +157,7 @@ export default async function BerandaPage() {
         <div className="w-full py-8 md:px-margin-desktop max-w-max-width mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 px-safe">
           <div>
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              © 2024 Pemerintah Kelurahan Tiro Sompe. Seluruh Hak Cipta Dilindungi.
+              © 2026 KKN ITH 03 Tiro Sompe. Seluruh Hak Cipta Dilindungi.
             </p>
           </div>
           <div className="flex flex-wrap gap-4 md:justify-end">
