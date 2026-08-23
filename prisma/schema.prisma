@@ -96,8 +96,8 @@ model User {
   id            String    @id @default(cuid())
   nik           String?   @unique
   nama_lengkap  String
-  email         String    @unique
-  nomor_hp      String?
+  email         String?   @unique
+  nomor_hp      String?   @unique
   password_hash String?
   role          UserRole  @default(warga)
   is_active     Boolean   @default(true)

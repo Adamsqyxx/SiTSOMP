@@ -16,7 +16,7 @@ export const authConfig = {
     Credentials({
       name: "credentials",
       credentials: {
-        identifier: { label: "NIK atau Email", type: "text" },
+        identifier: { label: "NIK, Email, atau No. HP", type: "text" },
         password: { label: "Kata Sandi", type: "password" },
       },
       // authorize TIDAK didefinisikan di sini — di-override di auth.ts.

@@ -12,8 +12,8 @@ export async function POST(req: Request) {
     const { email, password, nik, nama_lengkap, nomor_hp } = body ?? {};
 
     // Validasi dasar
-    if (!email || !password || !nama_lengkap) {
-      return NextResponse.json({ error: "Email, kata sandi, dan nama wajib diisi." }, { status: 400 });
+    if (!password || !nama_lengkap) {
+      return NextResponse.json({ error: "Nama, kata sandi, dan minimal satu identifier (NIK/email/No HP) wajib diisi." }, { status: 400 });
     }
     if (typeof password !== "string" || password.length < 8) {
       return NextResponse.json({ error: "Kata sandi minimal 8 karakter." }, { status: 400 });
@@ -21,21 +21,27 @@ export async function POST(req: Request) {
     if (!nik || !/^\d{16}$/.test(nik)) {
       return NextResponse.json({ error: "NIK wajib diisi dan harus 16 digit angka." }, { status: 400 });
     }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
+      return NextResponse.json({ error: "Format email tidak valid." }, { status: 400 });
+    }
     if (nomor_hp && !/^[0-9+\-\s()]{8,16}$/.test(String(nomor_hp))) {
       return NextResponse.json({ error: "Nomor telepon tidak valid." }, { status: 400 });
     }
 
-    // Cek duplikat NIK/email lebih dulu.
+    // Cek duplikat NIK/email/No HP lebih dulu.
+    const orFilters: { nik?: string; email?: string; nomor_hp?: string }[] = [{ nik }];
+    if (email) orFilters.push({ email: String(email).trim().toLowerCase() });
+    if (nomor_hp) orFilters.push({ nomor_hp: String(nomor_hp).trim() });
+
     const existing = await prisma.user.findFirst({
-      where: { OR: [{ nik }, { email }] },
-      select: { nik: true, email: true },
+      where: { OR: orFilters },
+      select: { nik: true, email: true, nomor_hp: true },
     });
     if (existing) {
-      const isNikDup = existing.nik === nik;
-      return NextResponse.json(
-        { error: isNikDup ? "NIK ini sudah terdaftar." : "Email ini sudah terdaftar." },
-        { status: 409 }
-      );
+      let error = "Email ini sudah terdaftar.";
+      if (existing.nik === nik) error = "NIK ini sudah terdaftar.";
+      else if (nomor_hp && existing.nomor_hp === String(nomor_hp).trim()) error = "Nomor telepon ini sudah terdaftar.";
+      return NextResponse.json({ error }, { status: 409 });
     }
 
     // Hash password (bcryptjs, 10 rounds).
@@ -43,10 +49,10 @@ export async function POST(req: Request) {
 
     const user = await prisma.user.create({
       data: {
-        email: String(email).trim().toLowerCase(),
+        email: email ? String(email).trim().toLowerCase() : null,
         nik: nik ?? null,
         nama_lengkap: String(nama_lengkap).trim(),
-        nomor_hp: nomor_hp ?? null,
+        nomor_hp: nomor_hp ? String(nomor_hp).trim() : null,
         password_hash: passwordHash,
         role: "warga",
         is_active: true,

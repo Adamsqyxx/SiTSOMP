@@ -82,7 +82,7 @@ export default function LoginPage() {
               className="block font-label-md text-label-md text-on-surface"
               htmlFor="identifier"
             >
-              NIK atau Email
+              NIK, Email, atau No. HP
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -92,7 +92,7 @@ export default function LoginPage() {
                 className="block w-full pl-10 pr-3 py-3 bg-surface-muted border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:ring-1 focus:ring-primary focus:border-primary transition-colors outline-none"
                 id="identifier"
                 name="identifier"
-                placeholder="Masukkan NIK (16 digit) atau email Anda"
+                placeholder="NIK (16 digit), email, atau No. HP"
                 required
                 type="text"
                 value={identifier}
@@ -187,9 +187,8 @@ export default function LoginPage() {
           <div className="flex items-start gap-3 bg-surface-container-low p-3 rounded-lg border border-outline-variant/30">
             <Info aria-hidden="true" className="w-5 h-5 text-info mt-0.5" />
             <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Gunakan NIK (Nomor Induk Kependudukan) Anda untuk masuk — sama
-              seperti saat mendaftar. Jika mengalami kendala, hubungi kantor
-              kelurahan.
+              Masuk dengan NIK, email, atau nomor telepon yang terdaftar. Jika
+              mengalami kendala, hubungi kantor kelurahan.
             </p>
           </div>
         </div>

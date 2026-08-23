@@ -12,6 +12,7 @@ import {
   IdCard,
   Info,
   Lock,
+  Mail,
   Smartphone,
   User,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import BackButton from "@/components/back-button";
 const INITIAL_FORM = {
   nik: "",
   fullname: "",
+  email: "",
   contact: "",
   password: "",
   terms: false,
@@ -43,13 +45,8 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    // Email belum ada di form; NIK dianggap sebagai email placeholder tidak valid.
-    // Untuk sekarang gunakan NIK + domain dummy? TIDAK — NIK bukan email.
-    // Ganti pendekatan: butuh email sebagai identifier Supabase.
-    // Untuk MVP, user bisa login pakai email. Karena form tidak punya email,
-    // kita jadikan NIK sebagai email sintetis <nik>@sitsomp.id sehingga
-    // Supabase Auth dapat dibuat & login bisa memakainya.
-    const email = `${form.nik}@sitsomp.id`;
+    // Email opsional; kalau kosong → null (login bisa via NIK/No HP).
+    const email = form.email.trim() || null;
 
     try {
       const res = await fetch("/api/auth/register", {
@@ -178,6 +175,27 @@ export default function RegisterPage() {
                 <Info aria-hidden="true" className="w-3.5 h-3.5 shrink-0" />
                 Pastikan NIK terdaftar di wilayah Kelurahan Tiro Sompe.
               </p>
+            </div>
+
+            {/* Email (opsional) */}
+            <div className="space-y-1.5">
+              <label className="block font-label-md text-label-md text-on-surface" htmlFor="email">
+                Email <span className="text-outline">(opsional)</span>
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <Mail aria-hidden="true" className="w-5 h-5 text-outline-variant" />
+                </div>
+                <input
+                  className="block w-full pl-11 pr-4 py-3 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md placeholder:text-outline focus:border-primary focus:ring-1 focus:ring-primary transition-colors outline-none"
+                  id="email"
+                  name="email"
+                  placeholder="Untuk notifikasi & login alternatif"
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setField("email", e.target.value)}
+                />
+              </div>
             </div>
 
             {/* Full name */}

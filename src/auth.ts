@@ -13,22 +13,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Credentials({
       name: "credentials",
       credentials: {
-        identifier: { label: "NIK atau Email", type: "text" },
+        identifier: { label: "NIK, Email, atau No. HP", type: "text" },
         password: { label: "Kata Sandi", type: "password" },
       },
       async authorize(credentials) {
         const identifier = String(credentials?.identifier ?? "").trim().toLowerCase();
         const password = String(credentials?.password ?? "");
+        if (!identifier) return null;
 
-        // NIK saja → email sintetis <NIK>@sitsomp.id (konsisten dengan register).
-        let email = identifier;
+        // Identifier bisa: NIK (16 digit), No HP, atau email.
+        // Akun lama (email sintetis <NIK>@sitsomp.id) tetap bisa login via NIK.
+        let user = null;
         if (/^\d{16}$/.test(identifier)) {
-          email = `${identifier}@sitsomp.id`;
+          // NIK persis, atau fallback email sintetis akun lama.
+          user =
+            (await prisma.user.findUnique({ where: { nik: identifier } })) ??
+            (await prisma.user.findUnique({ where: { email: `${identifier}@sitsomp.id` } }));
+        } else if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identifier)) {
+          user = await prisma.user.findUnique({ where: { email: identifier } });
+        } else {
+          // Anggap nomor telepon: cocokkan setelah buang spasi/strip.
+          const digits = identifier.replace(/[^0-9+]/g, "");
+          if (digits) {
+            const all = await prisma.user.findMany({ where: { nomor_hp: { not: null } } });
+            user =
+              all.find((u) => (u.nomor_hp ?? "").replace(/[^0-9+]/g, "") === digits) ?? null;
+          }
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email },
-        });
         if (!user || !user.password_hash || !user.is_active) return null;
 
         const valid = await bcrypt.compare(password, user.password_hash);
