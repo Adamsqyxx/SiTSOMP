@@ -238,9 +238,29 @@ export async function DELETE(req: Request) {
       `UPDATE penduduk SET user_id = NULL WHERE id = $1`,
       id
     );
+    const kkId = existing.kk_id;
     await prisma.penduduk.delete({ where: { id } });
 
-    return NextResponse.json({ message: `Penduduk ${existing.nama_lengkap} dihapus.` });
+    // Bersihkan kartu keluarga yang sudah tanpa anggota (yatim) supaya data
+    // tidak menampilkan KK kosong setelah semua warganya terhapus.
+    let kkDihapus = false;
+    if (kkId) {
+      const sisaAnggota = await prisma.penduduk.count({ where: { kk_id: kkId } });
+      if (sisaAnggota === 0) {
+        try {
+          await prisma.kartuKeluargaRelation.delete({ where: { id: kkId } });
+          kkDihapus = true;
+        } catch {
+          // KK masih dirujuk tabel lain (mis. WilayahRT via rt_id) — biarkan.
+        }
+      }
+    }
+
+    return NextResponse.json({
+      message: kkDihapus
+        ? `Penduduk ${existing.nama_lengkap} dihapus beserta kartu keluarganya (tanpa anggota tersisa).`
+        : `Penduduk ${existing.nama_lengkap} dihapus.`,
+    });
   } catch (err) {
     console.error("DELETE /api/admin/penduduk:", err);
     return NextResponse.json({ error: "Gagal menghapus penduduk." }, { status: 500 });

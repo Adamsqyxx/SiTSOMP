@@ -146,7 +146,11 @@ export default function DashboardPage() {
 
       {/* Content */}
       <main className="flex-grow pt-20 lg:pt-8 lg:pl-16 pb-16 md:px-margin-desktop bg-background px-safe">
-        {isStaff ? (
+        {muatUser ? (
+          <div className="flex items-center justify-center py-32">
+            <p className="font-body-md text-body-md text-on-surface-variant">Memuat data pengguna...</p>
+          </div>
+        ) : isStaff ? (
           /* Staf kelurahan: dashboard terpadu — antrean persetujuan
              layanan surat + data penduduk dalam satu halaman. */
           <AdminPanel />

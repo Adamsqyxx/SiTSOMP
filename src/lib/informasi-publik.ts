@@ -51,14 +51,6 @@ const POSTS_LAMA = [
 ];
 
 export async function getInformasiPublik(limit = 30): Promise<{
-  items: Array<{
-    jenis: JenisInformasi | string;
-    tagClass: string;
-    date: string;
-    title: string;
-    desc: string;
-  }>;
-}> {
   try {
     const rows = await prisma.informasiPublik.findMany({
       where: { is_published: true },
