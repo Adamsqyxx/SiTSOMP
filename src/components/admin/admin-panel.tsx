@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import dynamicImport from "next/dynamic";
+import { Toaster, toast } from "sonner";
 
 // Editor konten statis (kontak/kebijakan/peta situs) dimuat lazy —
 // hanya saat tab Konten dibuka.
@@ -268,6 +269,16 @@ export default function AdminPanel() {
 
   const simpanPenduduk = async () => {
     setFormError("");
+    // NIK wajib tepat 16 digit angka.
+    if (!/^\d{16}$/.test(form.nik.trim())) {
+      setFormError(
+        form.nik.trim().length < 16
+          ? `NIK belum lengkap: ${form.nik.trim().length}/16 digit. Lengkapi hingga 16 digit.`
+          : "NIK harus tepat 16 digit angka."
+      );
+      toast.error("NIK tidak valid — harus tepat 16 digit angka.");
+      return;
+    }
     setSimpanBerjalan(true);
     try {
       const res = await fetch("/api/admin/penduduk", {
@@ -429,6 +440,7 @@ export default function AdminPanel() {
 
   return (
     <>
+      <Toaster position="top-center" richColors />
       <div className="mx-auto flex w-full max-w-max-width flex-col gap-5 md:gap-6">
         <div>
           <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-surface">
@@ -1281,7 +1293,22 @@ export default function AdminPanel() {
                   type={"tipe" in f && f.tipe ? f.tipe : "text"}
                   value={form[f.k]}
                   placeholder={f.ph}
-                  onChange={(e) => setForm((prev) => ({ ...prev, [f.k]: e.target.value }))}
+                  inputMode={f.k === "nik" ? "numeric" : undefined}
+                  maxLength={f.k === "nik" ? 16 : undefined}
+                  onChange={(e) => {
+                    if (f.k === "nik") {
+                      const raw = e.target.value;
+                      const digits = raw.replace(/\D/g, "").slice(0, 16);
+                      if (/\D/.test(raw)) {
+                        toast.error("NIK hanya boleh berisi angka.");
+                      } else if (raw.length > 16) {
+                        toast.error("NIK maksimal 16 digit.");
+                      }
+                      setForm((prev) => ({ ...prev, nik: digits }));
+                    } else {
+                      setForm((prev) => ({ ...prev, [f.k]: e.target.value }));
+                    }
+                  }}
                   className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                 />
               </div>

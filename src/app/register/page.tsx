@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import BackButton from "@/components/back-button";
+import { Toaster, toast } from "sonner";
 
 // Form state untuk registrasi; koneksi ke Supabase Auth menunggu kredensial.
 const INITIAL_FORM = {
@@ -40,10 +41,32 @@ export default function RegisterPage() {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  // NIK wajib tepat 16 digit angka — blok lebih/kurang + popup.
+  const handleNikChange = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 16);
+    if (/\D/.test(value)) {
+      toast.error("NIK hanya boleh berisi angka.");
+    } else if (value.length > 16) {
+      toast.error("NIK maksimal 16 digit.");
+    }
+    setField("nik", digits);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
+
+    const nikBersih = form.nik.trim();
+    if (!/^\d{16}$/.test(nikBersih)) {
+      toast.error(
+        nikBersih.length < 16
+          ? `NIK belum lengkap: ${nikBersih.length}/16 digit. Lengkapi hingga 16 digit.`
+          : "NIK harus tepat 16 digit angka."
+      );
+      return;
+    }
+
+    setLoading(true);
 
     // Email opsional; kalau kosong → null (login bisa via NIK/No HP).
     const email = form.email.trim() || null;
@@ -77,6 +100,7 @@ export default function RegisterPage() {
 
   return (
     <main className="bg-background text-on-background min-h-screen w-full antialiased flex">
+      <Toaster position="top-center" richColors />
       {/* LEFT PANEL: Context & Branding (hidden lg) */}
       <section className="hidden lg:flex lg:w-5/12 bg-surface-container-low relative flex-col justify-between p-12 border-r border-outline-variant overflow-hidden">
         {/* Decorative background */}
@@ -167,7 +191,8 @@ export default function RegisterPage() {
                   required
                   type="text"
                   value={form.nik}
-                  onChange={(e) => setField("nik", e.target.value)}
+                  onChange={(e) => handleNikChange(e.target.value)}
+                  inputMode="numeric"
                   aria-describedby="nik-helper"
                 />
               </div>
