@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText, Map, Megaphone, Users } from "lucide-react";
 import AppHeader from "@/components/app-header";
+import StatistikPenduduk from "@/components/statistik-penduduk";
 import { getInformasiPublik, JENIS_INFO_LABEL } from "@/lib/informasi-publik";
 
 export const dynamic = "force-dynamic";
@@ -146,6 +147,9 @@ export default async function BerandaPage() {
             </Link>
           </div>
         </section>
+
+        {/* Statistik penduduk realtime */}
+        <StatistikPenduduk />
       </main>
 
       {/* Footer */}
