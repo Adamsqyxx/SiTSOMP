@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 interface MeResponse {
   user?: {
     id?: string;
+    nik?: string | null;
+    nama_lengkap?: string | null;
   } | null;
 }
 
@@ -23,6 +25,7 @@ export default function PengajuanPage() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [service, setService] = useState<SuratService | null>(null);
   const [userId, setUserId] = useState<string>("");
+  const [akun, setAkun] = useState<{ nik: string | null; nama_lengkap: string | null } | null>(null);
   const [files, setFiles] = useState<Record<string, File | null>>({});
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -59,12 +62,15 @@ export default function PengajuanPage() {
     };
   }, [params, searchParams]);
 
-  // Ambil user.id dari session (dibutuhkan sebagai prefix path upload).
+  // Ambil user.id + data identitas dari session (untuk validasi & prefix upload).
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((d: MeResponse | null) => {
         if (d?.user?.id) setUserId(d.user.id);
+        if (d?.user) {
+          setAkun({ nik: d.user.nik ?? null, nama_lengkap: d.user.nama_lengkap ?? null });
+        }
       })
       .catch(() => {});
   }, []);
@@ -101,6 +107,51 @@ export default function PengajuanPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+
+    // Validasi identitas: nama & NIK harus sesuai data resmi (akun/penduduk).
+    if (service) {
+      const errs: string[] = [];
+      const nama = (values.nama_lengkap ?? "").trim();
+      const nik = (values.nik ?? "").trim();
+
+      const namaResmi = new Set(
+        [akun?.nama_lengkap].filter((n): n is string => !!n).map(
+          (n) => n.trim().toLowerCase().replace(/\s+/g, " ")
+        )
+      );
+      if (!nama || nama.length < 3) {
+        errs.push("Nama lengkap wajib diisi sesuai KTP.");
+      } else if (namaResmi.size > 0 && !namaResmi.has(nama.toLowerCase().replace(/\s+/g, " "))) {
+        errs.push(
+          `Nama tidak sesuai data resmi. Gunakan nama lengkap sesuai KTP: "${akun?.nama_lengkap}".`
+        );
+      }
+
+      if (nik) {
+        if (!/^\d{16}$/.test(nik)) {
+          errs.push("NIK harus tepat 16 digit angka.");
+        } else if (akun?.nik && nik !== akun.nik) {
+          errs.push(
+            `NIK yang Anda isi tidak cocok dengan NIK akun Anda (${akun.nik.slice(0, 4)}****).`
+          );
+        }
+      } else if (values.nik !== undefined) {
+        errs.push("NIK wajib diisi 16 digit.");
+      }
+
+      // Field required generik yang masih kosong.
+      for (const f of service.fields) {
+        if (f.required && !(values[f.id] ?? "").trim()) {
+          errs.push(`${f.label} wajib diisi.`);
+        }
+      }
+
+      if (errs.length > 0) {
+        toast.error(errs.join(" "));
+        setError(errs.join(" "));
+        return;
+      }
+    }
 
     // Semua lampiran persyaratan wajib diunggah.
     if (service) {
@@ -148,7 +199,9 @@ export default function PengajuanPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Gagal mengirim pengajuan. Coba lagi.");
+        const pesan = data.error ?? "Gagal mengirim pengajuan. Coba lagi.";
+        setError(pesan);
+        toast.error(pesan);
         return;
       }
       setDone(true);

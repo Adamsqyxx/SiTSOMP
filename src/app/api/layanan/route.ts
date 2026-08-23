@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { getServiceBySlug } from "@/lib/surat-config";
+import { validasiIdentitasPemohon } from "@/lib/validasi-pengajuan";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,6 +73,21 @@ export async function POST(req: Request) {
         { error: "Silakan masuk terlebih dahulu untuk mengajukan surat." },
         { status: 401 }
       );
+    }
+
+    // Validasi identitas pemohon: nama/NIK harus sesuai data resmi akun+penduduk.
+    const userDb = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { id: true, nik: true, nama_lengkap: true },
+    });
+    if (userDb) {
+      const hasil = await validasiIdentitasPemohon({
+        userDb,
+        formData: data as Record<string, unknown>,
+      });
+      if (!hasil.ok) {
+        return NextResponse.json({ error: hasil.errors.join(" ") }, { status: 422 });
+      }
     }
 
     // Cari/buat jenis surat berdasarkan kode.
