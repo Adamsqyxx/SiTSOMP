@@ -51,6 +51,15 @@ const POSTS_LAMA = [
 ];
 
 export async function getInformasiPublik(limit = 30): Promise<{
+  items: Array<{
+    id?: string;
+    jenis: JenisInformasi | string;
+    tagClass: string;
+    date: string;
+    title: string;
+    desc: string;
+  }>;
+}> {
   try {
     const rows = await prisma.informasiPublik.findMany({
       where: { is_published: true },
@@ -60,6 +69,7 @@ export async function getInformasiPublik(limit = 30): Promise<{
     if (rows.length > 0) {
       return {
         items: rows.map((r) => ({
+          id: r.id,
           jenis: r.jenis,
           tagClass:
             r.jenis === "berita"
@@ -85,4 +95,36 @@ export async function getInformasiPublik(limit = 30): Promise<{
   }
   // Fallback: contoh konten awal sebelum admin menerbitkan apa pun.
   return { items: POSTS_LAMA.map((p) => ({ ...p })) };
+}
+
+// Detail satu informasi publik berdasarkan id — untuk halaman
+// /pengumuman/[id]. Hanya yang sudah publish; selain itu null (→ 404).
+export async function getInformasiPublikById(id: string) {
+  try {
+    const r = await prisma.informasiPublik.findFirst({
+      where: { id, is_published: true },
+    });
+    if (!r) return null;
+    return {
+      jenis: r.jenis,
+      tagClass:
+        r.jenis === "berita"
+          ? "text-primary"
+          : r.jenis === "kegiatan"
+            ? "text-secondary"
+            : r.jenis === "anggaran"
+              ? "text-warning"
+              : "text-info",
+      judul: r.judul,
+      konten: r.konten,
+      thumbnail_url: r.thumbnail_url,
+      published_at: r.published_at,
+      lokasi_kegiatan: r.lokasi_kegiatan,
+      kegiatan_mulai: r.kegiatan_mulai,
+      kegiatan_selesai: r.kegiatan_selesai,
+    };
+  } catch (e) {
+    console.error("getInformasiPublikById:", e);
+    return null;
+  }
 }

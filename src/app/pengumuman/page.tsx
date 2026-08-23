@@ -27,17 +27,26 @@ export default async function PengumumanPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {items.map((p) => (
             <article
-              key={p.title}
-              className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 hover:border-primary transition-colors"
+              key={p.id ?? p.title}
             >
-              <div className="flex justify-between items-start mb-2">
-                <span className={cn("font-label-sm text-label-sm font-bold", p.tagClass)}>
-                  {JENIS_INFO_LABEL[p.jenis as keyof typeof JENIS_INFO_LABEL] ?? "INFO"}
-                </span>
-                <span className="font-label-sm text-label-sm text-outline">{p.date}</span>
-              </div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-2">{p.title}</h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">{p.desc}</p>
+              <Link
+                href={p.id ? `/pengumuman/${p.id}` : "/pengumuman"}
+                aria-label={`Baca selengkapnya: ${p.title}`}
+                className="block bg-surface-container-lowest border border-border-subtle rounded-xl p-6 hover:border-primary hover:shadow-md transition-all h-full"
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <span className={cn("font-label-sm text-label-sm font-bold", p.tagClass)}>
+                    {JENIS_INFO_LABEL[p.jenis as keyof typeof JENIS_INFO_LABEL] ?? "INFO"}
+                  </span>
+                  <span className="font-label-sm text-label-sm text-outline">{p.date}</span>
+                </div>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface mb-2 group-hover:text-primary transition-colors">
+                  {p.title}
+                </h2>
+                <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-3">
+                  {p.desc}
+                </p>
+              </Link>
             </article>
           ))}
         </div>
