@@ -4,20 +4,62 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   LogOut,
+  Save,
+  Loader2,
 } from "lucide-react";
 import AppHeader from "@/components/app-header";
 import BackButton from "@/components/back-button";
+import { toast } from "sonner";
 
 export default function PengaturanPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{ email?: string | null; nama_lengkap?: string | null } | null>(null);
+  const [user, setUser] = useState<{ email?: string | null; nama_lengkap?: string | null; nomor_hp?: string | null } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Form states
+  const [nama, setNama] = useState("");
+  const [telepon, setTelepon] = useState("");
 
   useEffect(() => {
+    setLoading(true);
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((d) => setUser(d.user ?? null))
-      .catch(() => setUser(null));
+      .then((d) => {
+        const u = d.user ?? null;
+        setUser(u);
+        if (u) {
+          setNama(u.nama_lengkap ?? "");
+          setTelepon(u.nomor_hp ?? "");
+        }
+      })
+      .catch(() => setUser(null))
+      .finally(() => setLoading(false));
   }, []);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/auth/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nama_lengkap: nama,
+          nomor_hp: telepon,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Gagal menyimpan");
+
+      toast.success("Profil berhasil diperbarui");
+      router.refresh();
+    } catch (err) {
+      toast.error("Gagal memperbarui profil");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -69,9 +111,11 @@ export default function PengaturanPage() {
                   </label>
                   <input
                     id="nama"
-                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                    defaultValue={user?.nama_lengkap ?? ""}
+                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors disabled:opacity-50"
+                    value={nama}
+                    onChange={(e) => setNama(e.target.value)}
                     placeholder="Nama sesuai KTP"
+                    disabled={saving}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -80,17 +124,32 @@ export default function PengaturanPage() {
                   </label>
                   <input
                     id="telepon"
-                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+                    className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors disabled:opacity-50"
+                    value={telepon}
+                    onChange={(e) => setTelepon(e.target.value)}
                     placeholder="08xxxxxxxxxx"
+                    disabled={saving}
                   />
                 </div>
               </div>
 
               <button
                 type="button"
-                className="px-6 py-3 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-primary-fixed-variant transition-colors"
+                onClick={handleSave}
+                disabled={saving || loading || !user}
+                className="flex items-center justify-center gap-2 px-6 py-3 bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-primary-fixed-variant transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px]"
               >
-                Simpan Perubahan
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Simpan Perubahan
+                  </>
+                )}
               </button>
             </section>
 
