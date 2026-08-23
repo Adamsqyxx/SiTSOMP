@@ -7,12 +7,15 @@ import {
   Clock,
   FileSpreadsheet,
   FileText,
+  KeyRound,
   Pencil,
   Plus,
   RefreshCw,
   Search,
+  ShieldCheck,
   Trash2,
   Upload,
+  UserCog,
   Users,
   X,
   XCircle,
@@ -35,7 +38,7 @@ const FORMAT_DITERIMA = [".xlsx", ".xlsm", ".csv", ".ods", ".xlsb"];
 const PESAN_FORMAT_SALAH =
   "Format file tidak sesuai. Hanya file .xlsx, .xlsm, .csv, .ods, atau .xlsb yang dapat diupload.";
 
-type Tab = "layanan" | "penduduk" | "konten";
+type Tab = "layanan" | "penduduk" | "konten" | "akun";
 
 const STATUS_FILTERS = [
   { key: "", label: "Semua" },
@@ -119,6 +122,26 @@ interface ImportHasil {
   baris_gagal: number;
   total_baris: number;
   errors: string[];
+}
+
+// ── Tipe & konstanta panel Akun ───────────────────────────────────────
+const ROLE_LABELS: Record<string, string> = {
+  super_admin: "Super Admin",
+  lurah: "Lurah",
+  sekretaris: "Sekretaris",
+  petugas: "Petugas Kelurahan",
+  warga: "Warga",
+};
+
+interface AkunRow {
+  id: string;
+  nik: string | null;
+  nama_lengkap: string;
+  email: string | null;
+  nomor_hp: string | null;
+  role: string;
+  is_active: boolean;
+  created_at: string;
 }
 
 const KOSONG_FORM = {
@@ -340,6 +363,70 @@ export default function AdminPanel() {
       key === "" ? (c.total ?? 0) : (c[key] ?? 0);
   }, [counts]);
 
+  // ── State panel Akun ──
+  const [akun, setAkun] = useState<AkunRow[]>([]);
+  const [qAkun, setQAkun] = useState("");
+  const [muatAkun, setMuatAkun] = useState(false);
+  const [editAkun, setEditAkun] = useState<AkunRow | null>(null);
+  const [akunForm, setAkunForm] = useState({ nama_lengkap: "", email: "", nomor_hp: "", password: "" });
+  const [akunError, setAkunError] = useState("");
+  const [simpanAkunBerjalan, setSimpanAkunBerjalan] = useState(false);
+
+  const muatAkunData = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/akun");
+      const d = await res.json();
+      if (res.ok) setAkun(d.data ?? []);
+    } finally {
+      setMuatAkun(false);
+    }
+  }, []);
+
+  // Muat daftar akun hanya saat tab-nya dibuka.
+  useEffect(() => {
+    if (tab === "akun") muatAkunData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  const bukaEditAkun = (a: AkunRow) => {
+    setEditAkun(a);
+    setAkunForm({
+      nama_lengkap: a.nama_lengkap,
+      email: a.email ?? "",
+      nomor_hp: a.nomor_hp ?? "",
+      password: "",
+    });
+    setAkunError("");
+  };
+
+  const simpanAkun = async () => {
+    if (!editAkun) return;
+    setAkunError("");
+    setSimpanAkunBerjalan(true);
+    try {
+      const res = await fetch("/api/admin/akun", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editAkun.id,
+          nama_lengkap: akunForm.nama_lengkap,
+          email: akunForm.email,
+          nomor_hp: akunForm.nomor_hp,
+          ...(akunForm.password ? { password: akunForm.password } : {}),
+        }),
+      });
+      const d = await res.json();
+      if (!res.ok) {
+        setAkunError(d.error ?? "Gagal menyimpan akun.");
+        return;
+      }
+      setEditAkun(null);
+      muatAkunData();
+    } finally {
+      setSimpanAkunBerjalan(false);
+    }
+  };
+
   return (
     <>
       <div className="mx-auto flex w-full max-w-max-width flex-col gap-5 md:gap-6">
@@ -397,6 +484,19 @@ export default function AdminPanel() {
           >
             <FileText aria-hidden="true" className="w-4 h-4" />
             Konten
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("akun")}
+            className={cn(
+              "flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
+              tab === "akun"
+                ? "border-primary text-primary font-semibold"
+                : "border-transparent text-on-surface-variant hover:text-on-surface"
+            )}
+          >
+            <UserCog aria-hidden="true" className="w-4 h-4" />
+            Akun
           </button>
         </div>
 
@@ -867,7 +967,270 @@ export default function AdminPanel() {
             <InformasiEditor />
           </section>
         )}
+
+        {/* ══════════ TAB AKUN ══════════ */}
+        {tab === "akun" && (
+          <section className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="relative flex-1 min-w-0 sm:max-w-md">
+                <Search aria-hidden="true" className="absolute left-4 top-1/2 -translate-y-1/2 text-outline w-4 h-4" />
+                <input
+                  className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="Cari nama, NIK, atau email..."
+                  type="text"
+                  value={qAkun}
+                  onChange={(e) => setQAkun(e.target.value)}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setMuatAkun(true);
+                  muatAkunData();
+                }}
+                title="Muat ulang"
+                className="px-3 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container-low self-start sm:self-auto"
+              >
+                <RefreshCw aria-hidden="true" className={cn("w-4 h-4", muatAkun && "animate-spin")} />
+              </button>
+              <p className="font-label-sm text-label-sm text-outline sm:ml-auto">
+                {akun.length} akun terdaftar
+              </p>
+            </div>
+
+            {muatAkun ? (
+              <p className="font-body-md text-body-md text-on-surface-variant">Memuat daftar akun...</p>
+            ) : akun.length === 0 ? (
+              <div className="bg-surface-container-low border border-outline-variant rounded-xl p-10 text-center">
+                <UserCog aria-hidden="true" className="w-10 h-10 text-outline mx-auto mb-3" />
+                <p className="font-body-md text-body-md text-on-surface-variant">
+                  Belum ada akun terdaftar.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* Desktop: tabel */}
+                <div className="hidden md:block bg-surface-container-lowest border border-border-subtle rounded-xl overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="border-b border-outline-variant">
+                        {["Nama", "NIK", "Email", "No. HP", "Peran", ""].map((h) => (
+                          <th key={h} className="font-label-sm text-label-sm text-on-surface-variant py-3 px-4 whitespace-nowrap">
+                            {h}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="font-body-sm text-body-sm text-on-surface">
+                      {akun
+                        .filter((a) =>
+                          qAkun.trim()
+                            ? [a.nama_lengkap, a.nik, a.email]
+                                .filter(Boolean)
+                                .some((v) =>
+                                  String(v).toLowerCase().includes(qAkun.trim().toLowerCase())
+                                )
+                            : true
+                        )
+                        .map((a) => (
+                          <tr key={a.id} className="border-b border-border-subtle hover:bg-surface-muted transition-colors">
+                            <td className="py-3 px-4 font-medium">{a.nama_lengkap}</td>
+                            <td className="py-3 px-4 font-code-sm whitespace-nowrap">{a.nik ?? "-"}</td>
+                            <td className="py-3 px-4 break-all max-w-[220px]">{a.email ?? "-"}</td>
+                            <td className="py-3 px-4 whitespace-nowrap">{a.nomor_hp ?? "-"}</td>
+                            <td className="py-3 px-4 whitespace-nowrap">
+                              <span className={cn(
+                                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm",
+                                a.role === "warga"
+                                  ? "bg-surface-muted text-on-surface-variant"
+                                  : "bg-primary-container/50 text-on-primary-container"
+                              )}>
+                                {a.role !== "warga" && (
+                                  <ShieldCheck aria-hidden="true" className="w-3 h-3" />
+                                )}
+                                {ROLE_LABELS[a.role] ?? a.role}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => bukaEditAkun(a)}
+                                aria-label={`Kelola akun ${a.nama_lengkap}`}
+                                className="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high"
+                              >
+                                <Pencil aria-hidden="true" className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile: kartu */}
+                <div className="md:hidden grid grid-cols-1 gap-3">
+                  {akun
+                    .filter((a) =>
+                      qAkun.trim()
+                        ? [a.nama_lengkap, a.nik, a.email]
+                            .filter(Boolean)
+                            .some((v) =>
+                              String(v).toLowerCase().includes(qAkun.trim().toLowerCase())
+                            )
+                        : true
+                    )
+                    .map((a) => (
+                      <div key={a.id} className="bg-surface-container-lowest border border-border-subtle rounded-xl p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0">
+                            <h3 className="font-label-md text-label-md font-semibold text-on-surface truncate">
+                              {a.nama_lengkap}
+                            </h3>
+                            <p className="font-code-sm text-code-sm text-outline">{a.nik ?? "-"}</p>
+                          </div>
+                          <span className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-label-sm shrink-0",
+                            a.role === "warga"
+                              ? "bg-surface-muted text-on-surface-variant"
+                              : "bg-primary-container/50 text-on-primary-container"
+                          )}>
+                            {a.role !== "warga" && (
+                              <ShieldCheck aria-hidden="true" className="w-3 h-3" />
+                            )}
+                            {ROLE_LABELS[a.role] ?? a.role}
+                          </span>
+                        </div>
+                        <p className="font-body-sm text-body-sm text-on-surface-variant mt-2 break-all">
+                          {a.email ?? "-"} · {a.nomor_hp ?? "-"}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => bukaEditAkun(a)}
+                          className="w-full mt-3 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface"
+                        >
+                          <Pencil aria-hidden="true" className="w-4 h-4" /> Kelola Akun
+                        </button>
+                      </div>
+                    ))}
+                </div>
+              </>
+            )}
+          </section>
+        )}
       </div>
+
+      {/* Modal edit akun */}
+      {editAkun && (
+        <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6" role="dialog" aria-modal="true">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setEditAkun(null)} aria-hidden="true" />
+          <div className="relative bg-surface-container-lowest border border-border-subtle rounded-t-2xl md:rounded-2xl w-full md:max-w-md max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-headline-sm text-headline-sm text-on-surface">Kelola Akun</h2>
+              <button
+                type="button"
+                onClick={() => setEditAkun(null)}
+                aria-label="Tutup"
+                className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-low"
+              >
+                <X aria-hidden="true" className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 bg-surface-muted rounded-lg p-3">
+              <ShieldCheck aria-hidden="true" className="w-4 h-4 text-primary shrink-0" />
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                {editAkun.nama_lengkap} ·{" "}
+                <span className="text-on-surface">{ROLE_LABELS[editAkun.role] ?? editAkun.role}</span>
+                {editAkun.nik ? ` · NIK ${editAkun.nik}` : ""}
+              </p>
+            </div>
+
+            {akunError && (
+              <div role="alert" className="bg-error-container text-on-error-container rounded-lg p-3 font-body-sm text-body-sm">
+                {akunError}
+              </div>
+            )}
+
+            <div className="flex flex-col gap-4">
+              <div className="space-y-1">
+                <label htmlFor="akun-nama" className="block font-label-sm text-label-sm text-on-surface-variant">
+                  Nama Lengkap
+                </label>
+                <input
+                  id="akun-nama"
+                  type="text"
+                  value={akunForm.nama_lengkap}
+                  onChange={(e) => setAkunForm((prev) => ({ ...prev, nama_lengkap: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="akun-email" className="block font-label-sm text-label-sm text-on-surface-variant">
+                  Email
+                </label>
+                <input
+                  id="akun-email"
+                  type="email"
+                  value={akunForm.email}
+                  placeholder="Kosongkan bila tidak memakai email"
+                  onChange={(e) => setAkunForm((prev) => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="akun-hp" className="block font-label-sm text-label-sm text-on-surface-variant">
+                  Nomor HP / WhatsApp
+                </label>
+                <input
+                  id="akun-hp"
+                  type="tel"
+                  value={akunForm.nomor_hp}
+                  placeholder="08xxxxxxxxxx"
+                  onChange={(e) => setAkunForm((prev) => ({ ...prev, nomor_hp: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                />
+              </div>
+              <div className="space-y-1">
+                <label htmlFor="akun-password" className="block font-label-sm text-label-sm text-on-surface-variant">
+                  Password Baru (opsional)
+                </label>
+                <input
+                  id="akun-password"
+                  type="password"
+                  value={akunForm.password}
+                  placeholder="Minimal 8 karakter — kosongkan bila tidak diubah"
+                  autoComplete="new-password"
+                  onChange={(e) => setAkunForm((prev) => ({ ...prev, password: e.target.value }))}
+                  className="w-full px-4 py-2.5 bg-surface border border-outline-variant rounded-lg text-on-surface font-body-md text-body-md focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                />
+                <p className="font-label-sm text-label-sm text-outline flex items-center gap-1 mt-1">
+                  <KeyRound aria-hidden="true" className="w-3 h-3" />
+                  Isi hanya bila ingin mengganti password akun ini.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-stretch sm:justify-end pt-2 sticky bottom-0 -mx-6 px-6 pb-1 bg-surface-container-lowest">
+              <button
+                type="button"
+                onClick={() => setEditAkun(null)}
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg border border-outline-variant font-label-md text-label-md text-on-surface-variant"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={simpanAkun}
+                disabled={simpanAkunBerjalan || !akunForm.nama_lengkap.trim()}
+                className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md disabled:opacity-60"
+              >
+                {simpanAkunBerjalan ? "Menyimpan..." : "Simpan"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal tambah/ubah penduduk */}
     {formBuka && (
       <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center p-0 md:p-6" role="dialog" aria-modal="true">

@@ -53,10 +53,10 @@ export async function PATCH(req: Request) {
         nomor_hp: updated.nomor_hp,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Profile Update Error:", error);
     return NextResponse.json(
-      { error: error.message || "Gagal memperbarui profil" },
+      { error: error instanceof Error ? error.message : "Gagal memperbarui profil" },
       { status: 500 }
     );
   }

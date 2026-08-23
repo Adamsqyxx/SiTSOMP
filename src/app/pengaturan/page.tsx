@@ -14,7 +14,7 @@ import { Toaster, toast } from "sonner";
 export default function PengaturanPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ email?: string | null; nama_lengkap?: string | null; nomor_hp?: string | null } | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   // Form states
@@ -22,10 +22,11 @@ export default function PengaturanPage() {
   const [telepon, setTelepon] = useState("");
 
   useEffect(() => {
-    setLoading(true);
+    let batal = false;
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => {
+        if (batal) return;
         const u = d.user ?? null;
         setUser(u);
         if (u) {
@@ -33,8 +34,15 @@ export default function PengaturanPage() {
           setTelepon(u.nomor_hp ?? "");
         }
       })
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+      .catch(() => {
+        if (!batal) setUser(null);
+      })
+      .finally(() => {
+        if (!batal) setLoading(false);
+      });
+    return () => {
+      batal = true;
+    };
   }, []);
 
   const handleSave = async () => {
@@ -59,7 +67,7 @@ export default function PengaturanPage() {
 
       toast.success("Profil berhasil diperbarui");
       router.refresh();
-    } catch (err) {
+    } catch {
       toast.error("Gagal memperbarui profil");
     } finally {
       setSaving(false);
