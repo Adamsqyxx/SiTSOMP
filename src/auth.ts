@@ -7,6 +7,8 @@ import Credentials from "next-auth/providers/credentials";
 // Konfigurasi NextAuth (Auth.js) v5 — Credentials Provider + JWT session.
 // authConfig (tanpa Prisma) dipakai proxy di Edge Runtime; di sini
 // ditambah authorize yang butuh DB (bcrypt + Prisma).
+const ROLE_REFRESH_MS = 5 * 60 * 1000;
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
@@ -64,6 +66,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.role = (user as { role?: string }).role ?? "warga";
         token.nik = (user as { nik?: string | null }).nik ?? null;
         token.nama_lengkap = (user as { name?: string | null }).name ?? null;
+        token.roleRefreshedAt = Date.now();
+      } else if (token.id) {
+        // Refresh role dari DB maks. sekali per ROLE_REFRESH_MS —
+        // kalau akun dipromosikan/demosikan saat sesi aktif,
+        // emblem peran di /profil ikut berubah tanpa login ulang.
+        const last = (token.roleRefreshedAt as number | undefined) ?? 0;
+        if (Date.now() - last > ROLE_REFRESH_MS) {
+          try {
+            const dbUser = await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { role: true, is_active: true },
+            });
+            if (dbUser && dbUser.is_active) {
+              token.role = dbUser.role;
+            }
+            token.roleRefreshedAt = Date.now();
+          } catch {
+            // DB gagal → pakai role lama di token.
+          }
+        }
       }
       return token;
     },
