@@ -89,6 +89,7 @@ const ANNOUNCEMENTS = [
 export default function DashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [muatUser, setMuatUser] = useState(true);
   const [riwayat, setRiwayat] = useState<Riwayat[]>([]);
   const [muatRiwayat, setMuatRiwayat] = useState(true);
 
@@ -96,7 +97,8 @@ export default function DashboardPage() {
     fetch("/api/auth/me")
       .then((r) => r.json())
       .then((d) => setUser(d.user ?? null))
-      .catch(() => setUser(null));
+      .catch(() => setUser(null))
+      .finally(() => setMuatUser(false));
 
     fetch("/api/layanan/riwayat")
       .then((r) => r.json())

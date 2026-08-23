@@ -41,9 +41,13 @@ export default function StatistikPenduduk() {
   }, []);
 
   useEffect(() => {
-    load();
+    // Fetch pertama lewat timeout supaya setState tidak sinkron di body effect.
+    const first = setTimeout(load, 0);
     const t = setInterval(load, 30_000);
-    return () => clearInterval(t);
+    return () => {
+      clearTimeout(first);
+      clearInterval(t);
+    };
   }, [load]);
 
   return (
