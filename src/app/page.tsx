@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { FileText, Map, Megaphone, Users } from "lucide-react";
 import AppHeader from "@/components/app-header";
-import StatistikPenduduk from "@/components/statistik-penduduk";
 import { getInformasiPublik, JENIS_INFO_LABEL } from "@/lib/informasi-publik";
+import { TIRO_SOMPE_STATISTIK, SUMBER_DATA } from "@/lib/bps-penduduk";
 
 export const dynamic = "force-dynamic";
 
@@ -148,8 +148,56 @@ export default async function BerandaPage() {
           </div>
         </section>
 
-        {/* Statistik penduduk realtime */}
-        <StatistikPenduduk />
+        {/* Statistik penduduk — data BPS (server-rendered, selalu tampil) */}
+        <section aria-label="Statistik penduduk" className="mb-16">
+          <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+            <h3 className="font-headline-sm text-headline-sm font-semibold text-on-surface">
+              Jumlah Penduduk Tiro Sompe
+            </h3>
+            <Link
+              href="/data-penduduk"
+              className="font-label-sm text-label-sm text-primary hover:underline"
+            >
+              Lihat detail statistik →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-primary-container/20 rounded-xl p-5 md:p-6 border border-border-subtle col-span-2 lg:col-span-1 flex flex-col justify-between min-h-[120px]">
+              <div className="bg-primary/10 w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary">
+                <Users aria-hidden="true" className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="font-headline-md text-headline-md font-bold text-on-surface tabular-nums">
+                  {new Intl.NumberFormat("id-ID").format(TIRO_SOMPE_STATISTIK.jumlah_penduduk)}
+                </p>
+                <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">Total Penduduk (jiwa)</p>
+              </div>
+            </div>
+            <div className="bg-surface rounded-xl p-5 md:p-6 border border-border-subtle flex flex-col justify-between min-h-[120px]">
+              <p className="font-label-md text-label-md text-on-surface-variant mb-3">Laki-laki</p>
+              <p className="font-headline-md text-headline-md font-bold text-on-surface tabular-nums">
+                {new Intl.NumberFormat("id-ID").format(TIRO_SOMPE_STATISTIK.laki_laki)}
+              </p>
+            </div>
+            <div className="bg-surface rounded-xl p-5 md:p-6 border border-border-subtle flex flex-col justify-between min-h-[120px]">
+              <p className="font-label-md text-label-md text-on-surface-variant mb-3">Perempuan</p>
+              <p className="font-headline-md text-headline-md font-bold text-on-surface tabular-nums">
+                {new Intl.NumberFormat("id-ID").format(TIRO_SOMPE_STATISTIK.perempuan)}
+              </p>
+            </div>
+            <div className="bg-surface rounded-xl p-5 md:p-6 border border-border-subtle flex flex-col justify-between min-h-[120px]">
+              <p className="font-label-md text-label-md text-on-surface-variant mb-3">Kepadatan</p>
+              <p className="font-headline-md text-headline-md font-bold text-on-surface tabular-nums">
+                {new Intl.NumberFormat("id-ID").format(TIRO_SOMPE_STATISTIK.kepadatan_per_km2)}
+              </p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">jiwa/km²</p>
+            </div>
+          </div>
+          <p className="font-label-sm text-label-sm text-outline mt-3">
+            Sumber: {SUMBER_DATA.penerbit} — {SUMBER_DATA.publikasi} ·{" "}
+            {TIRO_SOMPE_STATISTIK.rt} RT / {TIRO_SOMPE_STATISTIK.rw} RW
+          </p>
+        </section>
       </main>
 
       {/* Footer */}
