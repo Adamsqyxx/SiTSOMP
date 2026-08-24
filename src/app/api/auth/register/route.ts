@@ -11,9 +11,9 @@ export async function POST(req: Request) {
     const body = await req.json().catch(() => null);
     const { email, password, nik, nama_lengkap, nomor_hp } = body ?? {};
 
-    // Validasi dasar
-    if (!password || !nama_lengkap) {
-      return NextResponse.json({ error: "Nama, kata sandi, dan minimal satu identifier (NIK/email/No HP) wajib diisi." }, { status: 400 });
+    // Validasi dasar — semua field wajib (NIK, email, nama, No HP, kata sandi).
+    if (!password || !nama_lengkap || !email || !nomor_hp) {
+      return NextResponse.json({ error: "Nama lengkap, email, nomor telepon/WhatsApp, dan kata sandi wajib diisi." }, { status: 400 });
     }
     if (typeof password !== "string" || password.length < 8) {
       return NextResponse.json({ error: "Kata sandi minimal 8 karakter." }, { status: 400 });

@@ -68,7 +68,7 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    // Email opsional; kalau kosong → null (login bisa via NIK/No HP).
+    // Email kini wajib; tetap normalisasi trim untuk konsistensi.
     const email = form.email.trim() || null;
 
     try {
@@ -202,10 +202,10 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* Email (opsional) */}
+            {/* Email */}
             <div className="space-y-1.5">
               <label className="block font-label-md text-label-md text-on-surface" htmlFor="email">
-                Email <span className="text-outline">(opsional)</span>
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -216,6 +216,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   placeholder="Untuk notifikasi & login alternatif"
+                  required
                   type="email"
                   value={form.email}
                   onChange={(e) => setField("email", e.target.value)}
