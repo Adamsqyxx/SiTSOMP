@@ -156,9 +156,9 @@ export default function DataPendudukPage() {
               <>
                 {/* Kartu utama */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-                  <div className="bg-primary-container/30 rounded-xl p-4">
+                  <div className="bg-surface-muted rounded-xl p-4">
                     <p className="font-label-sm text-label-sm text-on-surface-variant">Jumlah Penduduk</p>
-                    <p className="font-headline-md text-headline-md font-bold text-primary mt-1">
+                    <p className="font-headline-md text-headline-md font-bold text-on-surface mt-1">
                       {nf.format(stat.jumlah_penduduk)}
                     </p>
                     <p className="font-body-sm text-body-sm text-on-surface-variant">jiwa</p>

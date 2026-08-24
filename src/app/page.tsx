@@ -162,7 +162,7 @@ export default async function BerandaPage() {
             </Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-primary-container/20 rounded-xl p-5 md:p-6 border border-border-subtle col-span-2 lg:col-span-1 flex flex-col justify-between min-h-[120px]">
+            <div className="bg-surface rounded-xl p-5 md:p-6 border border-border-subtle col-span-2 lg:col-span-1 flex flex-col justify-between min-h-[120px]">
               <div className="bg-primary/10 w-10 h-10 rounded-lg flex items-center justify-center mb-3 text-primary">
                 <Users aria-hidden="true" className="w-5 h-5" />
               </div>
