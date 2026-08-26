@@ -1,39 +1,61 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowRight, Search } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AppHeader from "@/components/app-header";
+import { getLayananIcon } from "@/lib/layanan-icons";
 import {
-  SERVICES,
   CATEGORIES,
   type SuratCategory,
-  type SuratService,
 } from "@/lib/surat-config";
 
+// Kartu layanan buatan admin (tabel layanan_cards). SEJAK 2026-08-25
+// seluruh layanan surat bawaan dihapus — grid ini HANYA menampilkan kartu
+// yang dikelola admin dari dashboard (tab "Kartu Layanan").
+interface LayananCardPublik {
+  id: string;
+  judul: string;
+  deskripsi: string;
+  icon: string;
+  link_url: string;
+  label_tombol: string;
+}
+
 export default function LayananSuratPage() {
-  const router = useRouter();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<SuratCategory>("Semua");
+  const [cards, setCards] = useState<LayananCardPublik[]>([]);
+  const [muat, setMuat] = useState(true);
 
-  const filtered = useMemo(() => {
+  useEffect(() => {
+    let batal = false;
+    fetch("/api/layanan/cards")
+      .then((r) => r.json())
+      .then((d) => {
+        if (!batal && Array.isArray(d?.data)) setCards(d.data);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!batal) setMuat(false);
+      });
+    return () => {
+      batal = true;
+    };
+  }, []);
+
+  const kartuTerfilter = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return SERVICES.filter((s) => {
-      const matchCat = category === "Semua" || s.category === category;
+    return cards.filter((c) => {
+      const matchCat = category === "Semua" || category === "Lainnya";
       const matchQ =
         !q ||
-        s.name.toLowerCase().includes(q) ||
-        s.desc.toLowerCase().includes(q) ||
-        s.id.toLowerCase().includes(q);
+        c.judul.toLowerCase().includes(q) ||
+        c.deskripsi.toLowerCase().includes(q);
       return matchCat && matchQ;
     });
-  }, [query, category]);
-
-  const handleAction = (s: SuratService) => {
-    router.push(`/layanan/surat/${s.slug}?jenis=${encodeURIComponent(s.name)}`);
-  };
+  }, [cards, query, category]);
 
   return (
     <div className="bg-background text-on-background min-h-screen flex flex-col font-body-md antialiased">
@@ -46,8 +68,8 @@ export default function LayananSuratPage() {
               Layanan Surat Administrasi
             </h1>
             <p className="font-body-md text-body-md text-on-surface-variant max-w-2xl">
-              Pilih jenis surat yang ingin Anda ajukan. Pastikan Anda telah menyiapkan
-              semua persyaratan (foto/scan dokumen) sebelum memulai proses pengajuan.
+              Pilih layanan yang ingin Anda gunakan. Setiap kartu mengarahkan
+              ke halaman layanan resmi terkait.
             </p>
           </div>
 
@@ -60,7 +82,7 @@ export default function LayananSuratPage() {
               />
               <input
                 className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant rounded-lg font-body-md text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
-                placeholder="Cari jenis surat..."
+                placeholder="Cari layanan..."
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -85,54 +107,50 @@ export default function LayananSuratPage() {
             </div>
           </div>
 
-          {/* Services grid */}
-          {filtered.length === 0 ? (
-            <div className="text-center py-16 text-on-surface-variant font-body-md">
-              Tidak ada layanan yang cocok dengan pencarian &quot;{query}&quot;.
+          {/* Grid kartu layanan (semua dikelola admin) */}
+          {muat ? (
+            <p className="text-on-surface-variant font-body-md py-8 text-center">
+              Memuat layanan...
+            </p>
+          ) : kartuTerfilter.length === 0 ? (
+            <div className="bg-surface-container-low border border-outline-variant rounded-xl p-10 text-center">
+              <ExternalLink aria-hidden="true" className="w-10 h-10 text-outline mx-auto mb-3" />
+              <p className="font-body-md text-body-md text-on-surface-variant">
+                {cards.length === 0
+                  ? "Belum ada layanan yang tersedia. Layanan akan ditambahkan oleh admin kelurahan."
+                  : `Tidak ada layanan yang cocok dengan pencarian "${query}".`}
+              </p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filtered.map((s) => {
-                const Icon = s.icon;
+              {kartuTerfilter.map((c) => {
+                const Icon = getLayananIcon(c.icon);
                 return (
                   <div
-                    key={s.id}
+                    key={c.id}
                     className="bg-surface-container-lowest border border-border-subtle rounded-xl p-6 flex flex-col hover:border-primary transition-colors group"
                   >
-                    <div
-                      className={
-                        "w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-primary-fixed text-primary"
-                      }
-                    >
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 bg-primary-fixed text-primary">
                       <Icon aria-hidden="true" className="w-6 h-6" />
                     </div>
                     <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">
-                      {s.name}
+                      {c.judul}
                     </h3>
                     <p className="font-body-sm text-body-sm text-on-surface-variant mb-6 flex-1">
-                      {s.desc}
+                      {c.deskripsi}
                     </p>
-                    <div className="bg-surface-container-low rounded-lg p-4 mb-6">
-                      <h4 className="font-label-sm text-label-sm text-on-surface mb-2">
-                        Persyaratan (lampirkan foto/scan):
-                      </h4>
-                      <ul className="font-body-sm text-body-sm text-on-surface-variant space-y-1 list-disc pl-4">
-                        {s.requirements.map((r) => (
-                          <li key={r.label}>{r.label}</li>
-                        ))}
-                      </ul>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleAction(s)}
+                    <a
+                      href={c.link_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className={cn(
                         "w-full py-3 rounded-lg font-label-md text-label-md transition-colors flex justify-center items-center gap-2 mt-auto",
                         "bg-primary text-on-primary hover:bg-on-primary-fixed-variant"
                       )}
                     >
-                      Buat Pengajuan
-                      <ArrowRight aria-hidden="true" className="w-4 h-4" />
-                    </button>
+                      {c.label_tombol || "Buka Layanan"}
+                      <ExternalLink aria-hidden="true" className="w-4 h-4" />
+                    </a>
                   </div>
                 );
               })}

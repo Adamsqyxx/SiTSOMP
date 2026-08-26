@@ -371,6 +371,24 @@ model Lokasi {
   @@map("lokasi")
 }
 
+// Kartu layanan tambahan yang dikelola admin dari dashboard (tab "Kartu
+// Layanan"). Tampil di grid /layanan/surat berdampingan dengan kartu surat
+// bawaan; tombol kartu mengarah ke hyperlink eksternal sesuai input admin.
+model LayananCard {
+  id          String   @id @default(cuid())
+  judul       String
+  deskripsi   String
+  icon        String   @default("FileText") // nama ikon preset, lihat lib/layanan-icons.ts
+  link_url    String
+  label_tombol String  @default("Buka Layanan")
+  urutan      Int      @default(0)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("layanan_cards")
+}
+
 // Konten halaman statis yang bisa diedit admin dari dashboard
 // (kontak, kebijakan privasi, peta situs). Key-value: satu baris per
 // bagian; `data` berisi JSON sesuai bentuk konten tiap key.

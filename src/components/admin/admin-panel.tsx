@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ClipboardList,
   Clock,
+  ExternalLink,
   FileSpreadsheet,
   FileText,
   KeyRound,
@@ -33,13 +34,17 @@ const KontenEditor = dynamicImport(
 const InformasiEditor = dynamicImport(
   () => import("@/components/admin/informasi-editor")
 );
+// Editor kartu layanan buatan admin — lazy, hanya saat tab dibuka.
+const KartuLayananEditor = dynamicImport(
+  () => import("@/components/admin/kartu-layanan-editor")
+);
 
 // ── Konstanta tampilan ────────────────────────────────────────────────
 const FORMAT_DITERIMA = [".xlsx", ".xlsm", ".csv", ".ods", ".xlsb"];
 const PESAN_FORMAT_SALAH =
   "Format file tidak sesuai. Hanya file .xlsx, .xlsm, .csv, .ods, atau .xlsb yang dapat diupload.";
 
-type Tab = "layanan" | "penduduk" | "konten" | "akun";
+type Tab = "layanan" | "kartu" | "penduduk" | "konten" | "akun";
 
 const STATUS_FILTERS = [
   { key: "", label: "Semua" },
@@ -473,6 +478,19 @@ export default function AdminPanel() {
           </button>
           <button
             type="button"
+            onClick={() => setTab("kartu")}
+            className={cn(
+              "flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
+              tab === "kartu"
+                ? "border-primary text-primary font-semibold"
+                : "border-transparent text-on-surface-variant hover:text-on-surface"
+            )}
+          >
+            <ExternalLink aria-hidden="true" className="w-4 h-4" />
+            Kartu Layanan
+          </button>
+          <button
+            type="button"
             onClick={() => setTab("penduduk")}
             className={cn(
               "flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 font-label-md text-label-md border-b-2 -mb-px transition-colors",
@@ -743,6 +761,13 @@ export default function AdminPanel() {
                 })}
               </div>
             )}
+          </section>
+        )}
+
+        {/* ══════════ TAB KARTU LAYANAN ══════════ */}
+        {tab === "kartu" && (
+          <section className="flex flex-col gap-4">
+            <KartuLayananEditor />
           </section>
         )}
 
